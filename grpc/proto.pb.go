@@ -21,27 +21,27 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Students struct {
+type Connected struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Students      []string               `protobuf:"bytes,1,rep,name=students,proto3" json:"students,omitempty"` //repeated means that there can be more than one of this type. If it wasnt there it would only expect 1.
+	Connected     string                 `protobuf:"bytes,1,opt,name=connected,proto3" json:"connected,omitempty"` //repeated means that there can be more than one of this type. If it wasnt there it would only expect 1.
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Students) Reset() {
-	*x = Students{}
+func (x *Connected) Reset() {
+	*x = Connected{}
 	mi := &file_proto_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Students) String() string {
+func (x *Connected) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Students) ProtoMessage() {}
+func (*Connected) ProtoMessage() {}
 
-func (x *Students) ProtoReflect() protoreflect.Message {
+func (x *Connected) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -53,16 +53,16 @@ func (x *Students) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Students.ProtoReflect.Descriptor instead.
-func (*Students) Descriptor() ([]byte, []int) {
+// Deprecated: Use Connected.ProtoReflect.Descriptor instead.
+func (*Connected) Descriptor() ([]byte, []int) {
 	return file_proto_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Students) GetStudents() []string {
+func (x *Connected) GetConnected() string {
 	if x != nil {
-		return x.Students
+		return x.Connected
 	}
-	return nil
+	return ""
 }
 
 type Empty struct {
@@ -105,12 +105,13 @@ var File_proto_proto protoreflect.FileDescriptor
 
 const file_proto_proto_rawDesc = "" +
 	"\n" +
-	"\vproto.proto\"&\n" +
-	"\bStudents\x12\x1a\n" +
-	"\bstudents\x18\x01 \x03(\tR\bstudents\"\a\n" +
+	"\vproto.proto\")\n" +
+	"\tConnected\x12\x1c\n" +
+	"\tconnected\x18\x01 \x01(\tR\tconnected\"\a\n" +
 	"\x05Empty21\n" +
-	"\vITUDatabase\x12\"\n" +
-	"\vGetStudents\x12\x06.Empty\x1a\t.Students\"\x00B\x16Z\x14ITUServer/grpc/protob\x06proto3"
+	"\bChitChat\x12%\n" +
+	"\rGetConnection\x12\x06.Empty\x1a\n" +
+	".Connected\"\x00B\x1bZ\x19ChitChatServer/grpc/protob\x06proto3"
 
 var (
 	file_proto_proto_rawDescOnce sync.Once
@@ -126,12 +127,12 @@ func file_proto_proto_rawDescGZIP() []byte {
 
 var file_proto_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
 var file_proto_proto_goTypes = []any{
-	(*Students)(nil), // 0: Students
-	(*Empty)(nil),    // 1: Empty
+	(*Connected)(nil), // 0: Connected
+	(*Empty)(nil),     // 1: Empty
 }
 var file_proto_proto_depIdxs = []int32{
-	1, // 0: ITUDatabase.GetStudents:input_type -> Empty
-	0, // 1: ITUDatabase.GetStudents:output_type -> Students
+	1, // 0: ChitChat.GetConnection:input_type -> Empty
+	0, // 1: ChitChat.GetConnection:output_type -> Connected
 	1, // [1:2] is the sub-list for method output_type
 	0, // [0:1] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name

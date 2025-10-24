@@ -19,101 +19,101 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ITUDatabase_GetStudents_FullMethodName = "/ITUDatabase/GetStudents"
+	ChitChat_GetConnection_FullMethodName = "/ChitChat/GetConnection"
 )
 
-// ITUDatabaseClient is the client API for ITUDatabase service.
+// ChitChatClient is the client API for ChitChat service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type ITUDatabaseClient interface {
-	GetStudents(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Students, error)
+type ChitChatClient interface {
+	GetConnection(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Connected, error)
 }
 
-type iTUDatabaseClient struct {
+type chitChatClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewITUDatabaseClient(cc grpc.ClientConnInterface) ITUDatabaseClient {
-	return &iTUDatabaseClient{cc}
+func NewChitChatClient(cc grpc.ClientConnInterface) ChitChatClient {
+	return &chitChatClient{cc}
 }
 
-func (c *iTUDatabaseClient) GetStudents(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Students, error) {
+func (c *chitChatClient) GetConnection(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*Connected, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	out := new(Students)
-	err := c.cc.Invoke(ctx, ITUDatabase_GetStudents_FullMethodName, in, out, cOpts...)
+	out := new(Connected)
+	err := c.cc.Invoke(ctx, ChitChat_GetConnection_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// ITUDatabaseServer is the server API for ITUDatabase service.
-// All implementations must embed UnimplementedITUDatabaseServer
+// ChitChatServer is the server API for ChitChat service.
+// All implementations must embed UnimplementedChitChatServer
 // for forward compatibility.
-type ITUDatabaseServer interface {
-	GetStudents(context.Context, *Empty) (*Students, error)
-	mustEmbedUnimplementedITUDatabaseServer()
+type ChitChatServer interface {
+	GetConnection(context.Context, *Empty) (*Connected, error)
+	mustEmbedUnimplementedChitChatServer()
 }
 
-// UnimplementedITUDatabaseServer must be embedded to have
+// UnimplementedChitChatServer must be embedded to have
 // forward compatible implementations.
 //
 // NOTE: this should be embedded by value instead of pointer to avoid a nil
 // pointer dereference when methods are called.
-type UnimplementedITUDatabaseServer struct{}
+type UnimplementedChitChatServer struct{}
 
-func (UnimplementedITUDatabaseServer) GetStudents(context.Context, *Empty) (*Students, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method GetStudents not implemented")
+func (UnimplementedChitChatServer) GetConnection(context.Context, *Empty) (*Connected, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetConnection not implemented")
 }
-func (UnimplementedITUDatabaseServer) mustEmbedUnimplementedITUDatabaseServer() {}
-func (UnimplementedITUDatabaseServer) testEmbeddedByValue()                     {}
+func (UnimplementedChitChatServer) mustEmbedUnimplementedChitChatServer() {}
+func (UnimplementedChitChatServer) testEmbeddedByValue()                  {}
 
-// UnsafeITUDatabaseServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to ITUDatabaseServer will
+// UnsafeChitChatServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ChitChatServer will
 // result in compilation errors.
-type UnsafeITUDatabaseServer interface {
-	mustEmbedUnimplementedITUDatabaseServer()
+type UnsafeChitChatServer interface {
+	mustEmbedUnimplementedChitChatServer()
 }
 
-func RegisterITUDatabaseServer(s grpc.ServiceRegistrar, srv ITUDatabaseServer) {
-	// If the following call pancis, it indicates UnimplementedITUDatabaseServer was
+func RegisterChitChatServer(s grpc.ServiceRegistrar, srv ChitChatServer) {
+	// If the following call pancis, it indicates UnimplementedChitChatServer was
 	// embedded by pointer and is nil.  This will cause panics if an
 	// unimplemented method is ever invoked, so we test this at initialization
 	// time to prevent it from happening at runtime later due to I/O.
 	if t, ok := srv.(interface{ testEmbeddedByValue() }); ok {
 		t.testEmbeddedByValue()
 	}
-	s.RegisterService(&ITUDatabase_ServiceDesc, srv)
+	s.RegisterService(&ChitChat_ServiceDesc, srv)
 }
 
-func _ITUDatabase_GetStudents_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ChitChat_GetConnection_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ITUDatabaseServer).GetStudents(ctx, in)
+		return srv.(ChitChatServer).GetConnection(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: ITUDatabase_GetStudents_FullMethodName,
+		FullMethod: ChitChat_GetConnection_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ITUDatabaseServer).GetStudents(ctx, req.(*Empty))
+		return srv.(ChitChatServer).GetConnection(ctx, req.(*Empty))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// ITUDatabase_ServiceDesc is the grpc.ServiceDesc for ITUDatabase service.
+// ChitChat_ServiceDesc is the grpc.ServiceDesc for ChitChat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var ITUDatabase_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "ITUDatabase",
-	HandlerType: (*ITUDatabaseServer)(nil),
+var ChitChat_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "ChitChat",
+	HandlerType: (*ChitChatServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "GetStudents",
-			Handler:    _ITUDatabase_GetStudents_Handler,
+			MethodName: "GetConnection",
+			Handler:    _ChitChat_GetConnection_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

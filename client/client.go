@@ -1,8 +1,9 @@
 package main
 
 import (
-	proto "ITUServer/grpc"
+	proto "ChitChatServer/grpc"
 	"context"
+	"fmt"
 	"log"
 
 	"google.golang.org/grpc"
@@ -10,19 +11,16 @@ import (
 )
 
 func main() {
-	conn, err := grpc.NewClient("localhost:5050", grpc.WithTransportCredentials(insecure.NewCredentials())) //connects to server at localhost:5050. Insecure.newcredentials is used ti skip TLS encryption for simplification
+	conn, err := grpc.NewClient("localhost:5050", grpc.WithTransportCredentials(insecure.NewCredentials())) //connects to server at localhost:5050. Insecure.newcredentials is used to skip TLS encryption for simplification
 	if err != nil {
 		log.Fatalf("Not working")
 	}
 
-	client := proto.NewITUDatabaseClient(conn) //creates a client that can call RPC methods defined in the ITUDatabase service.
-
-	students, err := client.GetStudents(context.Background(), &proto.Empty{}) //Client calls getstudents with an empty request and receives a students message containing the list of names.
+	client := proto.NewChitChatClient(conn) //creates a client that can call RPC methods defined in the ChitChat service.
+	
+	connectionstatus, err := client.GetConnection(context.Background(), &proto.Empty{}) //Client calls getstudents with an empty request and receives a students message containing the list of names.
 	if err != nil {
 		log.Fatalf("Not working")
-	}
-
-	for _, student := range students.Students { //prints each student returned from the request.
-		println(" - " + student) 
-	}
+	} 
+	fmt.Print(connectionstatus)
 }

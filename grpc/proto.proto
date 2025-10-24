@@ -1,17 +1,16 @@
 syntax = "proto3";
-option go_package = "ITUServer/grpc/proto";
+option go_package = "ChitChatServer/grpc/proto";
 
 // run the proto file with : 
 // protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative proto.proto
 
-message Students {
-    repeated string students = 1; //repeated means that there can be more than one of this type. If it wasnt there it would only expect 1.
+message Connected {
+    string connected = 1; //repeated means that there can be more than one of this type. If it wasnt there it would only expect 1.
     // = 1 the order of the fields, so if we had another varaible, we would call it = 2
 }
 
 message Empty {} //this message will not receive any variables.
 
-service ITUDatabase { //maintain rpc calls between server and client. 
-    rpc GetStudents (Empty) returns (Students) {}; //is a function call. () is what it should send, and it should return Students. 
-    //If you send GetStudents from a client it sends empty and then it returns Students
+service ChitChat { //maintain rpc calls between server and client. 
+    rpc GetConnection (Empty) returns (Connected) {}; //is a function call. () is what it should send, and it should return Connected. 
 }
