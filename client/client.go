@@ -18,9 +18,17 @@ func main() {
 
 	client := proto.NewChitChatClient(conn) //creates a client that can call RPC methods defined in the ChitChat service.
 	
-	connectionstatus, err := client.GetConnection(context.Background(), &proto.Empty{}) //Client calls getstudents with an empty request and receives a students message containing the list of names.
+	// Establish connection stream to recaive messages from server
+	connection, err := client.ServerStream(context.Background(), &proto.Chat_Request{Greeting: "sup"})
 	if err != nil {
-		log.Fatalf("Not working")
+		log.Fatalf("Connection was not established")
 	} 
-	fmt.Print(connectionstatus)
+
+	clientIdMsg, err := connection.Recv(); 
+	if err != nil {
+		log.Fatalf("Client did not receive from stream")
+	} 
+	fmt.Println(clientIdMsg.Text)
+
+
 }
