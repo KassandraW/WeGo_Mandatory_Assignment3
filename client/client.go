@@ -15,6 +15,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Not working")
 	}
+	log.Print("Hello world !")
 
 	client := proto.NewChitChatClient(conn) //creates a client that can call RPC methods defined in the ChitChat service.
 	
