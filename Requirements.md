@@ -16,6 +16,9 @@ gRPC. A minimal configuration must include one service instance and at
 least three concurrently active clients.
 
 
+
+
+
 S3. Each participant can publish a valid chat message at any time. A
 
 valid message is a UTF-8 encoded string with a maximum length of 128
