@@ -1,1 +1,2 @@
-# WeGo_Mandatory_Assignment3
+# How to run the program
+To be written
