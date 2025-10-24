@@ -62,14 +62,10 @@ interface; and ii) log the message content and its logical timestamp.
 
 
 # Technical Requirements
-- The system must be implemented in Go
+- The system must be implemented in Go [x]
 
 
-- The gRPC framework must be used for client–server communication,
-
-  using Protocol Buffers (you must provide a .proto file) for message
-
-  definitions.
+- The gRPC framework must be used for client–server communication, using Protocol Buffers (you must provide a .proto file) for message definitions. [x]
 
 
 - The Go log standard library must be used for structured logging of
