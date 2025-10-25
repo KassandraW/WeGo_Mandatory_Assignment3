@@ -41,7 +41,7 @@ participant X joins, the service must broadcast a message of the form:
 
 "Participant X joined Chit Chat at logical time L". This message must
 
-be delivered to all participants, including the newly joined one.
+be delivered to all participants, including the newly joined one. [x]
 
 
 S6. Participants may leave the system at any time.  When a participant
@@ -50,7 +50,7 @@ X leaves, the service must broadcast a message of the form:
 
 "Participant X left Chit Chat at logical time L". This message must be
 
-delivered to all remaining participants.
+delivered to all remaining participants. [x]
 
 
 S7. When a participant receives any broadcast message, it must: i)

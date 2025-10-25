@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"strconv"
 	"sync"
 	"time"
 
@@ -16,17 +17,16 @@ import (
 // implements the gRPC service defined in the .proto file.
 type ChitChatServer struct {
 	proto.UnimplementedChitChatServer
-	mu                     sync.Mutex
 	clients                []ClientWrapper // slice of client streams for broadcasting
 	anonymous_client_names []string
+	lamportClock           int32
+	lock                   sync.Mutex
 }
 
 type ClientWrapper struct {
 	name   string
-	stream proto.ChitChat_ServerStreamServer
+	stream proto.ChitChat_GetServerStreamServer
 }
-
-var anonymous_client_names = []string{"Mercy", "Ana", "Lucio", "Reinhart", "Roadhog", "Sigma", "Soldier 76", "Ashe", "Sombra"}
 
 func (s *ChitChatServer) chooseRandomName() string {
 	if len(s.anonymous_client_names) == 0 {
@@ -43,8 +43,8 @@ func (s *ChitChatServer) recycleName(name string) {
 }
 
 func (s *ChitChatServer) Broadcast(msg *proto.ChatMsg) {
-	s.mu.Lock() // chat gpt recommends doing this
-	defer s.mu.Unlock()
+	s.lock.Lock()
+	defer s.lock.Unlock() // ensures the lock unlocks even if Send panicks or if there was a return inside the loop
 	for _, client := range s.clients {
 		client.stream.Send(msg)
 	}
@@ -63,47 +63,69 @@ func (s *ChitChatServer) RemoveClient(target ClientWrapper) {
 	}
 }
 
-func (s *ChitChatServer) ServerStream(request *proto.Chat_Request, stream proto.ChitChat_ServerStreamServer) error {
+func (s *ChitChatServer) ServerStream(timestamp *proto.Timestamp, stream proto.ChitChat_GetServerStreamServer) error {
+	// lamport clock business
+	s.lock.Lock()
+	s.syncClock(timestamp.Timestamp)
+	lamportTimeStr := strconv.Itoa(int(s.lamportClock)) // for broadcasting purposes
+	s.lock.Unlock()
+
 	//keep track of client name and send it to the client
 	name := s.chooseRandomName()
 	if name == "no names left" {
-		stream.Send(&proto.ChatMsg{Text: name})
+		stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
 		return nil
 	} else {
-		stream.Send(&proto.ChatMsg{Text: name})
+		stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
 	}
 
-	// add the client and its stream to list of clients
+	// add the client and its stream to the list of clients
+	s.lock.Lock()
 	new_client := ClientWrapper{name: name, stream: stream}
 	s.clients = append(s.clients, new_client)
-	//log the client joining
+	s.lock.Unlock()
+
+	// log the client joining
+	log.Println("Participant " + name + " joined Chit Chat at logical time" + lamportTimeStr)
 
 	//broadcast the client joining
-	s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " joined Chit Chat at logical time L", Sender: "Server"})
+	s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " joined Chit Chat at logical time" + lamportTimeStr, Sender: "Server"})
 
 	//keep the stream open until disconnection
 	for {
 		select {
 		case <-stream.Context().Done(): //handle the client disconnecting
+			s.lock.Lock()
 			//handle removing the client
 			s.RemoveClient(new_client)
 			s.recycleName(name)
 
 			//broadcast that the client has left
-			s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " left Chit Chat at logical time L", Sender: "Server"})
+			s.lamportClock += 1
+			s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " left Chit Chat at logical time " + strconv.Itoa(int(s.lamportClock)), Sender: "Server"})
+			s.lock.Unlock()
 			return nil
 
 		default:
 			time.Sleep(500 * time.Millisecond) //wait half a second before checking again
 		}
 	}
+}
 
+func (s *ChitChatServer) syncClock(clientClock int32) {
+	if clientClock > s.lamportClock {
+		s.lamportClock = clientClock
+		s.lamportClock += 1
+	}
 }
 
 func main() { //initializes server
-
+	var anonymous_client_names = []string{"Mercy", "Ana", "Lucio", "Reinhart", "Roadhog", "Sigma", "Soldier 76", "Ashe", "Sombra"}
 	server := &ChitChatServer{anonymous_client_names: anonymous_client_names}
-	fmt.Printf("ChitChat Server is up and runnning.\n")
+	server.lamportClock = 0
+
+	log.Println("The ChitChat Server is now up and runnning")
+	fmt.Println("The ChitChat Server is now up and runnning")
 	server.start_server() //starts the gRPC server
 }
 

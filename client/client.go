@@ -5,11 +5,16 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
+
+// Lamport clock
+var lamportClock int32 = 0
+var lamportLock sync.Mutex
 
 func messageSendingLoop(client proto.ChitChatClient, name string) {
 	var content string // the string to contain the message to be sent
@@ -33,18 +38,33 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 }
 
 func main() {
-	conn, err := grpc.NewClient("localhost:5050", grpc.WithTransportCredentials(insecure.NewCredentials())) //connects to server at localhost:5050. Insecure.newcredentials is used to skip TLS encryption for simplification
+	// connect to server at localhost:5050. Insecure.newcredentials is used to skip TLS encryption for simplification
+	conn, err := grpc.NewClient("localhost:5050", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Not working")
 	}
 
-	client := proto.NewChitChatClient(conn) //creates a client that can call RPC methods defined in the ChitChat service.
-	// Establish connection stream to recaive messages from server
-	stream, err := client.ServerStream(context.Background(), &proto.Chat_Request{Greeting: "sup"})
+	// create a client that can call RPC methods defined in the ChitChat service.
+	client := proto.NewChitChatClient(conn)
+
+	// establish connection stream to receive messages from server
+	// step 1. increment lamport clock
+	lamportLock.Lock()
+	lamportClock += 1
+
+	// step 2. poke the server to get a stream
+	stream, err := client.GetServerStream(context.Background(), &proto.Timestamp{Timestamp: lamportClock})
 	if err != nil {
 		log.Fatalf("Connection was not established")
 	}
+	// we are done using the lamportclock - unlock it
+	lamportLock.Unlock()
+
+	// receive our name for the session
 	name_msg, err := stream.Recv()
+	if err != nil {
+		log.Fatalf("Failed to receive message")
+	}
 	name := name_msg.Text
 	if name == "no names left" {
 		fmt.Println("the chat room is currently full! try again later.")
