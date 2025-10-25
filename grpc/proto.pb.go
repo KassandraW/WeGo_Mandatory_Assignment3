@@ -154,9 +154,10 @@ const file_proto_proto_rawDesc = "" +
 	"\x04text\x18\x01 \x01(\tR\x04text\"*\n" +
 	"\fChat_Request\x12\x1a\n" +
 	"\bgreeting\x18\x01 \x01(\tR\bgreeting\"\a\n" +
-	"\x05Empty26\n" +
+	"\x05Empty2X\n" +
 	"\bChitChat\x12*\n" +
-	"\fServerStream\x12\r.Chat_Request\x1a\t.Chat_msg0\x01B\x1bZ\x19ChitChatServer/grpc/protob\x06proto3"
+	"\fServerStream\x12\r.Chat_Request\x1a\t.Chat_msg0\x01\x12 \n" +
+	"\vPostMessage\x12\t.Chat_msg\x1a\x06.EmptyB\x1bZ\x19ChitChatServer/grpc/protob\x06proto3"
 
 var (
 	file_proto_proto_rawDescOnce sync.Once
@@ -178,9 +179,11 @@ var file_proto_proto_goTypes = []any{
 }
 var file_proto_proto_depIdxs = []int32{
 	1, // 0: ChitChat.ServerStream:input_type -> Chat_Request
-	0, // 1: ChitChat.ServerStream:output_type -> Chat_msg
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	0, // 1: ChitChat.PostMessage:input_type -> Chat_msg
+	0, // 2: ChitChat.ServerStream:output_type -> Chat_msg
+	2, // 3: ChitChat.PostMessage:output_type -> Empty
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name

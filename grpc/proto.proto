@@ -17,4 +17,5 @@ message Empty {}
 //Maintain rpc calls between server and client. 
 service ChitChat { 
     rpc ServerStream(Chat_Request) returns (stream Chat_msg);
+    rpc PostMessage(Chat_msg) returns (Empty);
 }

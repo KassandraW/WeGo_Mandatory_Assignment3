@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	ChitChat_ServerStream_FullMethodName = "/ChitChat/ServerStream"
+	ChitChat_PostMessage_FullMethodName  = "/ChitChat/PostMessage"
 )
 
 // ChitChatClient is the client API for ChitChat service.
@@ -29,6 +30,7 @@ const (
 // Maintain rpc calls between server and client.
 type ChitChatClient interface {
 	ServerStream(ctx context.Context, in *Chat_Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[ChatMsg], error)
+	PostMessage(ctx context.Context, in *ChatMsg, opts ...grpc.CallOption) (*Empty, error)
 }
 
 type chitChatClient struct {
@@ -58,6 +60,16 @@ func (c *chitChatClient) ServerStream(ctx context.Context, in *Chat_Request, opt
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ChitChat_ServerStreamClient = grpc.ServerStreamingClient[ChatMsg]
 
+func (c *chitChatClient) PostMessage(ctx context.Context, in *ChatMsg, opts ...grpc.CallOption) (*Empty, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, ChitChat_PostMessage_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ChitChatServer is the server API for ChitChat service.
 // All implementations must embed UnimplementedChitChatServer
 // for forward compatibility.
@@ -65,6 +77,7 @@ type ChitChat_ServerStreamClient = grpc.ServerStreamingClient[ChatMsg]
 // Maintain rpc calls between server and client.
 type ChitChatServer interface {
 	ServerStream(*Chat_Request, grpc.ServerStreamingServer[ChatMsg]) error
+	PostMessage(context.Context, *ChatMsg) (*Empty, error)
 	mustEmbedUnimplementedChitChatServer()
 }
 
@@ -77,6 +90,9 @@ type UnimplementedChitChatServer struct{}
 
 func (UnimplementedChitChatServer) ServerStream(*Chat_Request, grpc.ServerStreamingServer[ChatMsg]) error {
 	return status.Errorf(codes.Unimplemented, "method ServerStream not implemented")
+}
+func (UnimplementedChitChatServer) PostMessage(context.Context, *ChatMsg) (*Empty, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PostMessage not implemented")
 }
 func (UnimplementedChitChatServer) mustEmbedUnimplementedChitChatServer() {}
 func (UnimplementedChitChatServer) testEmbeddedByValue()                  {}
@@ -110,13 +126,36 @@ func _ChitChat_ServerStream_Handler(srv interface{}, stream grpc.ServerStream) e
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type ChitChat_ServerStreamServer = grpc.ServerStreamingServer[ChatMsg]
 
+func _ChitChat_PostMessage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChatMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChitChatServer).PostMessage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ChitChat_PostMessage_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChitChatServer).PostMessage(ctx, req.(*ChatMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // ChitChat_ServiceDesc is the grpc.ServiceDesc for ChitChat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var ChitChat_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "ChitChat",
 	HandlerType: (*ChitChatServer)(nil),
-	Methods:     []grpc.MethodDesc{},
+	Methods: []grpc.MethodDesc{
+		{
+			MethodName: "PostMessage",
+			Handler:    _ChitChat_PostMessage_Handler,
+		},
+	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "ServerStream",

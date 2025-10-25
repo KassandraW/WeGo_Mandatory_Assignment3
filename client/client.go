@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"time"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -17,18 +18,22 @@ func main() {
 	}
 
 	client := proto.NewChitChatClient(conn) //creates a client that can call RPC methods defined in the ChitChat service.
-	
 	// Establish connection stream to recaive messages from server
 	connection, err := client.ServerStream(context.Background(), &proto.Chat_Request{Greeting: "sup"})
+	client.PostMessage(connection.Context(), &proto.ChatMsg{Text: "hello guys"})
 	if err != nil {
 		log.Fatalf("Connection was not established")
-	} 
+	}
+	for {
+		msg, err := connection.Recv()
+		if msg != nil {
+			fmt.Println(msg.Text)
+		}
+		if err == nil {
+		}
+		time.Sleep(time.Millisecond * 100)
 
-	clientIdMsg, err := connection.Recv(); 
-	if err != nil {
-		log.Fatalf("Client did not receive from stream")
-	} 
-	fmt.Println(clientIdMsg.Text)
-
+		//client.PostMessage(context.Background(), &proto.ChatMsg{Text: "hey guys"})
+	}
 
 }
