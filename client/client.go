@@ -19,13 +19,14 @@ func messageSendingLoop(client proto.ChitChatClient, name string) {
 	}
 }
 
-func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg]) {
+func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], running *bool) {
 	for {
 		msg, err := stream.Recv() // get some message
 		if msg != nil {
 			fmt.Println(msg.Sender + ": " + msg.Text) // if this truly was a message, print it out
 		}
-		if err == nil { // this does naffin for now
+		if err != nil {
+			*running = false
 		}
 		time.Sleep(time.Millisecond * 100) // check for message 10 times per second
 	}
@@ -51,11 +52,13 @@ func main() {
 		fmt.Println("welcome to the chatroom! your name for this session is: " + name)
 	}
 
+	running := true
+
 	// keep two seperate loops for sending and receiving messages
 	// putting both into the same message loop proved cumbersome
 	go messageSendingLoop(client, name)
-	go messageReceivingLoop(stream)
-	for { // third loop for connection lifetime - possibly disconnecting should happen via a specialised message
+	go messageReceivingLoop(stream, &running)
+	for running { // third loop for connection lifetime - possibly disconnecting should happen via a specialised message
 	}
 
 }
