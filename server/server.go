@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net"
 	"sync"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -63,7 +64,7 @@ func (s *ChitChatServer) RemoveClient(target ClientWrapper) {
 }
 
 func (s *ChitChatServer) ServerStream(request *proto.Chat_Request, stream proto.ChitChat_ServerStreamServer) error {
-	//Keep track of clientID and send it to the client
+	//keep track of client name and send it to the client
 	name := s.chooseRandomName()
 	if name == "no names left" {
 		stream.Send(&proto.ChatMsg{Text: name})
@@ -72,15 +73,31 @@ func (s *ChitChatServer) ServerStream(request *proto.Chat_Request, stream proto.
 		stream.Send(&proto.ChatMsg{Text: name})
 	}
 
+	// add the client and its stream to list of clients
 	new_client := ClientWrapper{name: name, stream: stream}
-	s.clients = append(s.clients, new_client) // Add the stream to list of streams
+	s.clients = append(s.clients, new_client)
+	//log the client joining
 
-	s.Broadcast(&proto.ChatMsg{Text: name + " just joined!", Sender: "Server"}) // let them know the goat has arrived
-	<-stream.Context().Done()                                                   // block until the goat leaves
-	s.RemoveClient(new_client)                                                  // remove the stream from the list
-	s.recycleName(name)
-	s.Broadcast(&proto.ChatMsg{Text: name + " just left.", Sender: "Server"}) // let them know the goat has left
-	return nil
+	//broadcast the client joining
+	s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " joined Chit Chat at logical time L", Sender: "Server"})
+
+	//keep the stream open until disconnection
+	for {
+		select {
+		case <-stream.Context().Done(): //handle the client disconnecting
+			//handle removing the client
+			s.RemoveClient(new_client)
+			s.recycleName(name)
+
+			//broadcast that the client has left
+			s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " left Chit Chat at logical time L", Sender: "Server"})
+			return nil
+
+		default:
+			time.Sleep(500 * time.Millisecond) //wait half a second before checking again
+		}
+	}
+
 }
 
 func main() { //initializes server
