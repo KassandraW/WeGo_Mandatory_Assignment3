@@ -21,27 +21,28 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
-type Connected struct {
+type ChatMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Connected     string                 `protobuf:"bytes,1,opt,name=connected,proto3" json:"connected,omitempty"` //repeated means that there can be more than one of this type. If it wasnt there it would only expect 1.
+	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	Sender        string                 `protobuf:"bytes,2,opt,name=sender,proto3" json:"sender,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Connected) Reset() {
-	*x = Connected{}
+func (x *ChatMsg) Reset() {
+	*x = ChatMsg{}
 	mi := &file_proto_proto_msgTypes[0]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Connected) String() string {
+func (x *ChatMsg) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Connected) ProtoMessage() {}
+func (*ChatMsg) ProtoMessage() {}
 
-func (x *Connected) ProtoReflect() protoreflect.Message {
+func (x *ChatMsg) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_proto_msgTypes[0]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -53,14 +54,65 @@ func (x *Connected) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Connected.ProtoReflect.Descriptor instead.
-func (*Connected) Descriptor() ([]byte, []int) {
+// Deprecated: Use ChatMsg.ProtoReflect.Descriptor instead.
+func (*ChatMsg) Descriptor() ([]byte, []int) {
 	return file_proto_proto_rawDescGZIP(), []int{0}
 }
 
-func (x *Connected) GetConnected() string {
+func (x *ChatMsg) GetText() string {
 	if x != nil {
-		return x.Connected
+		return x.Text
+	}
+	return ""
+}
+
+func (x *ChatMsg) GetSender() string {
+	if x != nil {
+		return x.Sender
+	}
+	return ""
+}
+
+type Chat_Request struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Greeting      string                 `protobuf:"bytes,1,opt,name=greeting,proto3" json:"greeting,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *Chat_Request) Reset() {
+	*x = Chat_Request{}
+	mi := &file_proto_proto_msgTypes[1]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *Chat_Request) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*Chat_Request) ProtoMessage() {}
+
+func (x *Chat_Request) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_proto_msgTypes[1]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use Chat_Request.ProtoReflect.Descriptor instead.
+func (*Chat_Request) Descriptor() ([]byte, []int) {
+	return file_proto_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *Chat_Request) GetGreeting() string {
+	if x != nil {
+		return x.Greeting
 	}
 	return ""
 }
@@ -73,7 +125,7 @@ type Empty struct {
 
 func (x *Empty) Reset() {
 	*x = Empty{}
-	mi := &file_proto_proto_msgTypes[1]
+	mi := &file_proto_proto_msgTypes[2]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -85,7 +137,7 @@ func (x *Empty) String() string {
 func (*Empty) ProtoMessage() {}
 
 func (x *Empty) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_proto_msgTypes[1]
+	mi := &file_proto_proto_msgTypes[2]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -98,20 +150,23 @@ func (x *Empty) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Empty.ProtoReflect.Descriptor instead.
 func (*Empty) Descriptor() ([]byte, []int) {
-	return file_proto_proto_rawDescGZIP(), []int{1}
+	return file_proto_proto_rawDescGZIP(), []int{2}
 }
 
 var File_proto_proto protoreflect.FileDescriptor
 
 const file_proto_proto_rawDesc = "" +
 	"\n" +
-	"\vproto.proto\")\n" +
-	"\tConnected\x12\x1c\n" +
-	"\tconnected\x18\x01 \x01(\tR\tconnected\"\a\n" +
-	"\x05Empty21\n" +
-	"\bChitChat\x12%\n" +
-	"\rGetConnection\x12\x06.Empty\x1a\n" +
-	".Connected\"\x00B\x1bZ\x19ChitChatServer/grpc/protob\x06proto3"
+	"\vproto.proto\"6\n" +
+	"\bChat_msg\x12\x12\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\x12\x16\n" +
+	"\x06sender\x18\x02 \x01(\tR\x06sender\"*\n" +
+	"\fChat_Request\x12\x1a\n" +
+	"\bgreeting\x18\x01 \x01(\tR\bgreeting\"\a\n" +
+	"\x05Empty2X\n" +
+	"\bChitChat\x12*\n" +
+	"\fServerStream\x12\r.Chat_Request\x1a\t.Chat_msg0\x01\x12 \n" +
+	"\vPostMessage\x12\t.Chat_msg\x1a\x06.EmptyB\x1bZ\x19ChitChatServer/grpc/protob\x06proto3"
 
 var (
 	file_proto_proto_rawDescOnce sync.Once
@@ -125,16 +180,19 @@ func file_proto_proto_rawDescGZIP() []byte {
 	return file_proto_proto_rawDescData
 }
 
-var file_proto_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_proto_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_proto_proto_goTypes = []any{
-	(*Connected)(nil), // 0: Connected
-	(*Empty)(nil),     // 1: Empty
+	(*ChatMsg)(nil),      // 0: Chat_msg
+	(*Chat_Request)(nil), // 1: Chat_Request
+	(*Empty)(nil),        // 2: Empty
 }
 var file_proto_proto_depIdxs = []int32{
-	1, // 0: ChitChat.GetConnection:input_type -> Empty
-	0, // 1: ChitChat.GetConnection:output_type -> Connected
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 0: ChitChat.ServerStream:input_type -> Chat_Request
+	0, // 1: ChitChat.PostMessage:input_type -> Chat_msg
+	0, // 2: ChitChat.ServerStream:output_type -> Chat_msg
+	2, // 3: ChitChat.PostMessage:output_type -> Empty
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -151,7 +209,7 @@ func file_proto_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_proto_rawDesc), len(file_proto_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
