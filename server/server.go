@@ -68,27 +68,24 @@ func (s *ChitChatServer) ServerStream(timestamp *proto.Timestamp, stream proto.C
 	s.lock.Lock()
 	s.syncClock(timestamp.Timestamp)
 	lamportTimeStr := strconv.Itoa(int(s.lamportClock)) // for broadcasting purposes
-	s.lock.Unlock()
 
-	//keep track of client name and send it to the client
+	// give the client a name and determine if they can join - since we hardcoded how many can join
 	name := s.chooseRandomName()
-	if name == "no names left" {
-		stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
+	canJoin := name != "no names left"
+	new_client := ClientWrapper{name: name, stream: stream}
+
+	if canJoin {
+		s.clients = append(s.clients, new_client)
+	}
+	s.lock.Unlock()
+	stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
+
+	if !canJoin {
 		return nil
-	} else {
-		stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
 	}
 
-	// add the client and its stream to the list of clients
-	s.lock.Lock()
-	new_client := ClientWrapper{name: name, stream: stream}
-	s.clients = append(s.clients, new_client)
-	s.lock.Unlock()
-
-	// log the client joining
+	// logging and broadcasting
 	log.Println("Participant " + name + " joined Chit Chat at logical time" + lamportTimeStr)
-
-	//broadcast the client joining
 	s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " joined Chit Chat at logical time" + lamportTimeStr, Sender: "Server"})
 
 	//keep the stream open until disconnection
