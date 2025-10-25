@@ -5,8 +5,8 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"math/rand"
 	"net"
-	"strconv"
 	"sync"
 
 	"google.golang.org/grpc"
@@ -15,45 +15,77 @@ import (
 // implements the gRPC service defined in the .proto file.
 type ChitChatServer struct {
 	proto.UnimplementedChitChatServer
-	mu             sync.Mutex
-	client_streams []proto.ChitChat_ServerStreamServer // slice of client streams for broadcasting
+	mu                     sync.Mutex
+	clients                []ClientWrapper // slice of client streams for broadcasting
+	anonymous_client_names []string
 }
 
-func (s *ChitChatServer) Broadcast(msg string) {
+type ClientWrapper struct {
+	name   string
+	stream proto.ChitChat_ServerStreamServer
+}
+
+var anonymous_client_names = []string{"Mercy", "Ana", "Lucio", "Reinhart", "Roadhog", "Sigma", "Soldier 76", "Ashe", "Sombra"}
+
+func (s *ChitChatServer) chooseRandomName() string {
+	if len(s.anonymous_client_names) == 0 {
+		return "no names left"
+	}
+	random_index := rand.Intn(len(s.anonymous_client_names))
+	random_name := s.anonymous_client_names[random_index]
+	s.anonymous_client_names = append(s.anonymous_client_names[:random_index], s.anonymous_client_names[random_index+1:]...)
+	return random_name
+}
+
+func (s *ChitChatServer) recycleName(name string) {
+	s.anonymous_client_names = append(s.anonymous_client_names, name)
+}
+
+func (s *ChitChatServer) Broadcast(msg *proto.ChatMsg) {
 	s.mu.Lock() // chat gpt recommends doing this
 	defer s.mu.Unlock()
-	for _, stream := range s.client_streams {
-		stream.Send(&proto.ChatMsg{Text: msg})
+	for _, client := range s.clients {
+		client.stream.Send(msg)
 	}
 }
 
 func (s *ChitChatServer) PostMessage(ctx context.Context, msg *proto.ChatMsg) (*proto.Empty, error) {
-	s.Broadcast(msg.Text)
+	s.Broadcast(msg)
 	return &proto.Empty{}, nil
 }
 
-func (s *ChitChatServer) RemoveStream(target proto.ChitChat_ServerStreamServer) {
-	for i, stream := range s.client_streams {
-		if stream == target {
-			s.client_streams = append(s.client_streams[:i], s.client_streams[i+1:]...)
+func (s *ChitChatServer) RemoveClient(target ClientWrapper) {
+	for i, client := range s.clients {
+		if client == target {
+			s.clients = append(s.clients[:i], s.clients[i+1:]...)
 		}
 	}
 }
 
 func (s *ChitChatServer) ServerStream(request *proto.Chat_Request, stream proto.ChitChat_ServerStreamServer) error {
-	s.client_streams = append(s.client_streams, stream) // Add the stream to list of streams
-
 	//Keep track of clientID and send it to the client
-	clientId := len(s.client_streams)
-	s.Broadcast(strconv.Itoa(clientId) + " just joined!") // let them know the goat has arrived
-	<-stream.Context().Done()                             // block until the goat leaves
-	s.RemoveStream(stream)                                // remove the stream from the list
-	s.Broadcast(strconv.Itoa(clientId) + " just left.")   // let them know the goat has left
+	name := s.chooseRandomName()
+	if name == "no names left" {
+		stream.Send(&proto.ChatMsg{Text: name})
+		return nil
+	} else {
+		stream.Send(&proto.ChatMsg{Text: name})
+	}
+
+	new_client := ClientWrapper{name: name, stream: stream}
+	s.clients = append(s.clients, new_client) // Add the stream to list of streams
+
+	s.Broadcast(&proto.ChatMsg{Text: name + " just joined!", Sender: "Server"}) // let them know the goat has arrived
+	<-stream.Context().Done()                                                   // block until the goat leaves
+	s.RemoveClient(new_client)                                                  // remove the stream from the list
+	s.recycleName(name)
+	s.Broadcast(&proto.ChatMsg{Text: name + " just left.", Sender: "Server"}) // let them know the goat has left
 	return nil
 }
 
 func main() { //initializes server
-	server := &ChitChatServer{}
+
+	server := &ChitChatServer{anonymous_client_names: anonymous_client_names}
 	fmt.Printf("ChitChat Server is up and runnning.\n")
 	server.start_server() //starts the gRPC server
 }

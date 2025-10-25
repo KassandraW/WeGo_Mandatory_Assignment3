@@ -11,11 +11,11 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
-func messageSendingLoop(client proto.ChitChatClient) {
+func messageSendingLoop(client proto.ChitChatClient, name string) {
 	var content string // the string to contain the message to be sent
 	for {
-		fmt.Scanln(&content)                                                    // capture input from the client
-		client.PostMessage(context.Background(), &proto.ChatMsg{Text: content}) // send the message
+		fmt.Scanln(&content)                                                                  // capture input from the client
+		client.PostMessage(context.Background(), &proto.ChatMsg{Text: content, Sender: name}) // send the message
 	}
 }
 
@@ -23,7 +23,7 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg]) {
 	for {
 		msg, err := stream.Recv() // get some message
 		if msg != nil {
-			fmt.Println(msg.Text) // if this trulu was a message, print it out
+			fmt.Println(msg.Sender + ": " + msg.Text) // if this truly was a message, print it out
 		}
 		if err == nil { // this does naffin for now
 		}
@@ -43,10 +43,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Connection was not established")
 	}
+	name_msg, err := stream.Recv()
+	name := name_msg.Text
+	if name == "no names left" {
+		fmt.Println("the chat room is currently full! try again later.")
+	} else {
+		fmt.Println("welcome to the chatroom! your name for this session is: " + name)
+	}
 
 	// keep two seperate loops for sending and receiving messages
 	// putting both into the same message loop proved cumbersome
-	go messageSendingLoop(client)
+	go messageSendingLoop(client, name)
 	go messageReceivingLoop(stream)
 	for { // third loop for connection lifetime - possibly disconnecting should happen via a specialised message
 	}

@@ -6,6 +6,7 @@ option go_package = "ChitChatServer/grpc/proto";
 
 message Chat_msg {
     string text = 1;
+    string sender = 2;
 }
 
 message Chat_Request { //Placeholder message, we are probably gonna replace it with some lamport clock

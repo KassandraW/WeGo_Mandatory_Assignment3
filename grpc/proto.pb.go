@@ -24,6 +24,7 @@ const (
 type ChatMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
+	Sender        string                 `protobuf:"bytes,2,opt,name=sender,proto3" json:"sender,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -61,6 +62,13 @@ func (*ChatMsg) Descriptor() ([]byte, []int) {
 func (x *ChatMsg) GetText() string {
 	if x != nil {
 		return x.Text
+	}
+	return ""
+}
+
+func (x *ChatMsg) GetSender() string {
+	if x != nil {
+		return x.Sender
 	}
 	return ""
 }
@@ -149,9 +157,10 @@ var File_proto_proto protoreflect.FileDescriptor
 
 const file_proto_proto_rawDesc = "" +
 	"\n" +
-	"\vproto.proto\"\x1e\n" +
+	"\vproto.proto\"6\n" +
 	"\bChat_msg\x12\x12\n" +
-	"\x04text\x18\x01 \x01(\tR\x04text\"*\n" +
+	"\x04text\x18\x01 \x01(\tR\x04text\x12\x16\n" +
+	"\x06sender\x18\x02 \x01(\tR\x06sender\"*\n" +
 	"\fChat_Request\x12\x1a\n" +
 	"\bgreeting\x18\x01 \x01(\tR\bgreeting\"\a\n" +
 	"\x05Empty2X\n" +
