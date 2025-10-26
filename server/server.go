@@ -63,7 +63,7 @@ func (s *ChitChatServer) RemoveClient(target ClientWrapper) {
 	}
 }
 
-func (s *ChitChatServer) ServerStream(timestamp *proto.Timestamp, stream proto.ChitChat_GetServerStreamServer) error {
+func (s *ChitChatServer) GetServerStream(timestamp *proto.Timestamp, stream proto.ChitChat_GetServerStreamServer) error {
 	// lamport clock business
 	s.lock.Lock()
 	s.syncClock(timestamp.Timestamp)
@@ -71,22 +71,20 @@ func (s *ChitChatServer) ServerStream(timestamp *proto.Timestamp, stream proto.C
 
 	// give the client a name and determine if they can join - since we hardcoded how many can join
 	name := s.chooseRandomName()
-	canJoin := name != "no names left"
 	new_client := ClientWrapper{name: name, stream: stream}
-
-	if canJoin {
+	if name == "no names left" {
+		stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
+		return nil
+	} else {
+		stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
 		s.clients = append(s.clients, new_client)
 	}
 	s.lock.Unlock()
 	stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
 
-	if !canJoin {
-		return nil
-	}
-
 	// logging and broadcasting
 	log.Println("Participant " + name + " joined Chit Chat at logical time" + lamportTimeStr)
-	s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " joined Chit Chat at logical time" + lamportTimeStr, Sender: "Server"})
+	s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " joined Chit Chat at logical time " + lamportTimeStr, Sender: "Server"})
 
 	//keep the stream open until disconnection
 	for {
