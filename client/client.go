@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 	"sync"
 	"time"
 
@@ -28,7 +29,10 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 	for {
 		msg, err := stream.Recv() // get some message
 		if msg != nil {
-			fmt.Println(msg.Sender + ": " + msg.Text) // if this truly was a message, print it out
+			lamportLock.Lock()
+			lamportClock = max(lamportClock, msg.Timestamp) + 1                                 // sync the lamport clock
+			fmt.Println(strconv.Itoa(int(lamportClock)) + " : " + msg.Sender + ": " + msg.Text) // if this truly was a message, print it out
+			lamportLock.Unlock()
 		}
 		if err != nil {
 			*running = false
@@ -65,12 +69,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to receive message")
 	}
+	lamportLock.Lock()
+	lamportClock = max(lamportClock, name_msg.Timestamp) + 1
+
 	name := name_msg.Text
 	if name == "no names left" {
-		fmt.Println("the chat room is currently full! try again later.")
+		fmt.Println(strconv.Itoa(int(lamportClock)) + " : the chat room is currently full! try again later.")
 	} else {
-		fmt.Println("welcome to the chatroom! your name for this session is: " + name)
+		fmt.Println(strconv.Itoa(int(lamportClock)) + " : welcome to the chatroom! your name for this session is: " + name)
 	}
+	lamportLock.Unlock()
 
 	running := true
 

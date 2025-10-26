@@ -25,6 +25,7 @@ type ChatMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	Sender        string                 `protobuf:"bytes,2,opt,name=sender,proto3" json:"sender,omitempty"`
+	Timestamp     int32                  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -71,6 +72,13 @@ func (x *ChatMsg) GetSender() string {
 		return x.Sender
 	}
 	return ""
+}
+
+func (x *ChatMsg) GetTimestamp() int32 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
 }
 
 type Timestamp struct {
@@ -157,10 +165,11 @@ var File_proto_proto protoreflect.FileDescriptor
 
 const file_proto_proto_rawDesc = "" +
 	"\n" +
-	"\vproto.proto\"6\n" +
+	"\vproto.proto\"T\n" +
 	"\bChat_msg\x12\x12\n" +
 	"\x04text\x18\x01 \x01(\tR\x04text\x12\x16\n" +
-	"\x06sender\x18\x02 \x01(\tR\x06sender\")\n" +
+	"\x06sender\x18\x02 \x01(\tR\x06sender\x12\x1c\n" +
+	"\ttimestamp\x18\x03 \x01(\x05R\ttimestamp\")\n" +
 	"\tTimestamp\x12\x1c\n" +
 	"\ttimestamp\x18\x01 \x01(\x05R\ttimestamp\"\a\n" +
 	"\x05Empty2X\n" +

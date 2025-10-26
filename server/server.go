@@ -73,17 +73,16 @@ func (s *ChitChatServer) GetServerStream(timestamp *proto.Timestamp, stream prot
 	name := s.chooseRandomName()
 	new_client := ClientWrapper{name: name, stream: stream}
 	if name == "no names left" {
-		stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
+		stream.Send(&proto.ChatMsg{Text: name, Sender: "server", Timestamp: s.lamportClock})
 		return nil
 	} else {
-		stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
+		stream.Send(&proto.ChatMsg{Text: name, Sender: "server", Timestamp: s.lamportClock})
 		s.clients = append(s.clients, new_client)
 	}
 	s.lock.Unlock()
-	stream.Send(&proto.ChatMsg{Text: name, Sender: "server"})
 
 	// logging and broadcasting
-	log.Println("Participant " + name + " joined Chit Chat at logical time" + lamportTimeStr)
+	log.Println("Participant " + name + " joined Chit Chat at logical time " + lamportTimeStr)
 	s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " joined Chit Chat at logical time " + lamportTimeStr, Sender: "Server"})
 
 	//keep the stream open until disconnection
@@ -95,9 +94,10 @@ func (s *ChitChatServer) GetServerStream(timestamp *proto.Timestamp, stream prot
 			s.RemoveClient(new_client)
 			s.recycleName(name)
 
-			//broadcast that the client has left
+			//broadcast & log
 			s.lamportClock += 1
-			s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " left Chit Chat at logical time " + strconv.Itoa(int(s.lamportClock)), Sender: "Server"})
+			log.Println("Participant " + name + " left Chit Chat at logical time " + strconv.Itoa(int(s.lamportClock)))
+			s.Broadcast(&proto.ChatMsg{Text: "Participant " + name + " left Chit Chat at logical time " + strconv.Itoa(int(s.lamportClock)), Sender: "Server", Timestamp: s.lamportClock})
 			s.lock.Unlock()
 			return nil
 
@@ -110,12 +110,12 @@ func (s *ChitChatServer) GetServerStream(timestamp *proto.Timestamp, stream prot
 func (s *ChitChatServer) syncClock(clientClock int32) {
 	if clientClock > s.lamportClock {
 		s.lamportClock = clientClock
-		s.lamportClock += 1
 	}
+	s.lamportClock += 1
 }
 
 func main() { //initializes server
-	var anonymous_client_names = []string{"Mercy", "Ana", "Lucio", "Reinhart", "Roadhog", "Sigma", "Soldier 76", "Ashe", "Sombra"}
+	var anonymous_client_names = []string{"Mercy", "Ana", "Lucio", "Reinhardt", "Roadhog", "Sigma", "Soldier 76", "Ashe", "Sombra"}
 	server := &ChitChatServer{anonymous_client_names: anonymous_client_names}
 	server.lamportClock = 0
 
