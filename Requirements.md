@@ -32,7 +32,7 @@ S4. The Chit Chat service must broadcast each published message to all
 
 currently active participants. Each broadcast must include the message
 
-content and a logical timestamp.
+content and a logical timestamp. [x]
 
 
 S5. Participants may join the system at any time.  When a new
@@ -57,7 +57,7 @@ S7. When a participant receives any broadcast message, it must: i)
 
 display the message content and its logical timestamp on the client
 
-interface; and ii) log the message content and its logical timestamp.
+interface; and ii) log the message content and its logical timestamp. [x] mangler log til fil
 
 
 
