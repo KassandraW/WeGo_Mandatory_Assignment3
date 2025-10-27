@@ -20,8 +20,8 @@ var lamportLock sync.Mutex
 var name string
 
 func log_event(event_type string, msg *proto.ChatMsg) {
-	fmt.Println(name + " " + event_type + " from " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)) + " : \"" + msg.Text + "\" and timestamp " + strconv.Itoa(int(msg.Timestamp)))
-	log.Println(name + " " + event_type + " from " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)) + " : \"" + msg.Text + "\" and timestamp " + strconv.Itoa(int(msg.Timestamp)))
+	fmt.Println(name + " " + event_type + " from " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)) + " : \"" + msg.Text + "\"")
+	log.Println(name + " " + event_type + " from " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)) + " : \"" + msg.Text + "\"")
 }
 
 func messageSendingLoop(client proto.ChitChatClient, name string) {
@@ -30,9 +30,14 @@ func messageSendingLoop(client proto.ChitChatClient, name string) {
 		fmt.Scanln(&content) // capture input from the client
 		lamportLock.Lock()   //update clock
 		lamportClock += 1
-		message := &proto.ChatMsg{Text: content, Sender: name, Timestamp: lamportClock}
-		log_event("sent a message", message)
-		client.PostMessage(context.Background(), message) // send the message
+		msg := &proto.ChatMsg{Text: content, Sender: name, Timestamp: lamportClock}
+
+		// Log the sending event
+		fmt.Println(name + " sent a message " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)))
+		log.Println(name + " sent a message at logical time " + strconv.Itoa(int(lamportClock)))
+		
+		// Send the message
+		client.PostMessage(context.Background(), msg) 
 		lamportLock.Unlock()
 	}
 }
@@ -43,7 +48,8 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 		if msg != nil {
 			lamportLock.Lock()
 			lamportClock = max(lamportClock, msg.Timestamp) + 1 // sync the lamport clock
-			log_event("recieved a message", msg)
+			fmt.Println(name + " received a message from " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)) + " : \"" + msg.Text + "\"")
+			log.Println(name + " received a message from " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)) + " : \"" + msg.Text + "\"")
 			lamportLock.Unlock()
 		}
 		if err != nil {

@@ -62,9 +62,14 @@ func (s *ChitChatServer) PostMessage(ctx context.Context, msg *proto.ChatMsg) (*
 	// sync server clock with incoming message
 	s.lock.Lock()
 	s.syncClock(msg.Timestamp)
-
-	fmt.Println("Server ; T = " + strconv.Itoa(int(s.lamportClock)) + " ; Broadcast ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
-	log.Println("Server ; T = " + strconv.Itoa(int(s.lamportClock)) + " ; Broadcast ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
+	fmt.Println("Server received a message from " + msg.Sender + " at logical time " + strconv.Itoa(int(s.lamportClock)))
+	log.Println("Server received a message from " + msg.Sender + " at logical time " + strconv.Itoa(int(s.lamportClock)))
+	
+	s.lamportClock += 1
+	updatedTS := s.lamportClock
+	msg.Timestamp = updatedTS
+	fmt.Println("Server broadcasted a message from " + msg.Sender + " at logical time " + strconv.Itoa(int(s.lamportClock)))
+	log.Println("Server broadcasted a message from " + msg.Sender + " at logical time " + strconv.Itoa(int(s.lamportClock)))
 	s.lock.Unlock()
 
 	s.Broadcast(msg)
@@ -83,21 +88,23 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 	// Gather state under lock, then perform Send/Broadcast without holding the lock.
 	s.lock.Lock()
 	s.syncClock(timestamp.Timestamp)
-	lamportBefore := s.lamportClock // timestamp used for the name message
-	log.Println("Server received request to join at logical time " + strconv.Itoa(int(s.lamportClock)) + " with the timestamp " + strconv.Itoa(int(timestamp.Timestamp)))
+	log.Println("Server received a request to join the chat at logical time " + strconv.Itoa(int(s.lamportClock)))
 	// give the client a name and determine if they can join
 	name := s.chooseRandomName()
 	new_client := ClientWrapper{name: name, stream: stream}
 
-	if name == "no names left" {
-		// reply with the current logical time and exit
-		s.lock.Unlock()
-		stream.Send(&proto.ChatMsg{
+	//Send name event
+	s.lamportClock += 1 
+	stream.Send(&proto.ChatMsg{
 			Text:      name,
 			Sender:    "Server",
-			Timestamp: lamportBefore})
+			Timestamp: s.lamportClock})
+	if name == "no names left" {
+		s.lock.Unlock()
 		return nil
 	}
+	fmt.Println("Server sent a name to joining client : \"" + name + "\" at logical time " + strconv.Itoa(int(s.lamportClock)))
+	log.Println("Server sent a name to joining client : \"" + name + "\" at logical time " + strconv.Itoa(int(s.lamportClock)))
 
 	// add client and prepare broadcast message/timestamp
 	s.clients = append(s.clients, new_client)
@@ -110,15 +117,9 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 	}
 	s.lock.Unlock()
 
-	// Send the assigned name to the joining client (uses the pre-increment timestamp)
-	stream.Send(&proto.ChatMsg{
-		Text:      name,
-		Sender:    "Server",
-		Timestamp: lamportBefore})
-	fmt.Println("Sent name to joining : \"" + name + "\" at logical time " + strconv.Itoa(int(lamportBefore)))
-	log.Println("Sent name to joining : \"" + name + "\" at logical time " + strconv.Itoa(int(lamportBefore)))
+	
 
-	// Log and broadcast the join (does not hold the server lock)
+	// Log and broadcast the join
 	fmt.Println("Participant " + name + " joined Chit Chat at logical time " + strconv.Itoa(int(broadcastTS)))
 	log.Println("Participant " + name + " joined Chit Chat at logical time " + strconv.Itoa(int(broadcastTS)))
 	s.Broadcast(broadcastMsg)
@@ -203,15 +204,9 @@ func (s *ChitChatServer) start_server() {
 			if content == "exit" {
 				s.lock.Lock()
 				s.lamportClock += 1
-				fmt.Println("The ChitChat Server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)))
-				log.Println("The ChitChat Server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)))
+				fmt.Println("The ChitChat server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)))
+				log.Println("The ChitChat server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)))
 				fmt.Println("Please enter Ctrl + C to completely shut down.")
-				shutdown_message := &proto.ChatMsg{
-					Text:      "The ChitChat Server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)),
-					Sender:    "server",
-					Timestamp: s.lamportClock,
-				}
-				s.Broadcast(shutdown_message)
 				s.lock.Unlock()
 				time.Sleep(3 * time.Second)
 				grpcServer.GracefulStop() //the server is now closed for rpc calls

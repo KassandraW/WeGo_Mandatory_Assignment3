@@ -1,10 +1,27 @@
-server.go:185: The ChitChat Server is now up and runnning at logical time 1
-client.go:80: Client has sent a join request to the server at logical time 1
-server.go:87: Server received request to join at logical time 2 with the timestamp 1
-server.go:119: Sent name to joining : "Soldier 76" at logical time 2
-server.go:123: Participant Soldier 76 joined Chit Chat at logical time 3
-client.go:24: Soldier 76 received a name from Server at logical time 3 : "Soldier 76" and timestamp 2
-client.go:24: Soldier 76 recieved a message from Server at logical time 4 : "Participant Soldier 76 joined Chit Chat at logical time 3" and timestamp 3
-client.go:24: Soldier 76 sent a message from Soldier 76 at logical time 5 : "hey" and timestamp 5
-server.go:67: Server ; T = 6 ; Broadcast ; "hey" ; Timestamp = 5
-client.go:24: Soldier 76 recieved a message from Soldier 76 at logical time 6 : "hey" and timestamp 5
+server.go:186: The ChitChat Server is now up and running at logical time 1
+client.go:86: Client has sent a join request to the server at logical time 1
+server.go:91: Server received a request to join the chat at logical time 2
+server.go:107: Server sent a name to joining client : "Ana" at logical time 3
+server.go:124: Participant Ana joined Chit Chat at logical time 4
+client.go:24: Ana received a name from Server at logical time 4 : "Ana"
+client.go:52: Ana received a message from Server at logical time 5 : "Participant Ana joined Chit Chat at logical time 4"
+client.go:86: Client has sent a join request to the server at logical time 1
+server.go:91: Server received a request to join the chat at logical time 5
+server.go:107: Server sent a name to joining client : "Roadhog" at logical time 6
+server.go:124: Participant Roadhog joined Chit Chat at logical time 7
+client.go:24: Roadhog received a name from Server at logical time 7 : "Roadhog"
+client.go:52: Roadhog received a message from Server at logical time 8 : "Participant Roadhog joined Chit Chat at logical time 7"
+client.go:52: Ana received a message from Server at logical time 8 : "Participant Roadhog joined Chit Chat at logical time 7"
+client.go:37: Ana sent a message Ana at logical time 9
+server.go:66: Server received a message from Ana at logical time 10
+server.go:72: Server broadcasted a message from Ana at logical time 11
+client.go:52: Roadhog received a message from Ana at logical time 12 : "hey"
+client.go:52: Ana received a message from Ana at logical time 12 : "hey"
+client.go:37: Roadhog sent a message Roadhog at logical time 13
+server.go:66: Server received a message from Roadhog at logical time 14
+server.go:72: Server broadcasted a message from Roadhog at logical time 15
+client.go:52: Ana received a message from Roadhog at logical time 16 : "bye"
+client.go:52: Roadhog received a message from Roadhog at logical time 16 : "bye"
+server.go:146: Participant Roadhog left Chit Chat at logical time 16
+client.go:52: Ana received a message from Server at logical time 17 : "Participant Roadhog left Chit Chat at logical time 16"
+server.go:208: The ChitChat server is shutting down at logical time 17
