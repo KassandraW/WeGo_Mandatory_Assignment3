@@ -64,8 +64,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("Connection was not established")
 	}
-	// we are done using the lamportclock - unlock it
-	lamportLock.Unlock()
 
 	// receive our name for the session
 	name_msg, err := stream.Recv()
@@ -74,7 +72,6 @@ func main() {
 	}
 
 	//update lamport clock
-	lamportLock.Lock()
 	lamportClock = max(lamportClock, name_msg.Timestamp) + 1
 
 	name := name_msg.Text
