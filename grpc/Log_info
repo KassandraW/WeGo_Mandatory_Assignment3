@@ -1,5 +1,38 @@
 server.go:182: The ChitChat Server is now up and runnning at logical time 1
-server.go:116: Sent name to joining : "Ana" at logical time 2
-server.go:120: Participant Ana joined Chit Chat at logical time 3
-client.go:23: Server ; T = 3 ; RecvName ; "Ana" ; Timestamp = 2
-client.go:23: Server ; T = 4 ; Recv ; "Participant Ana joined Chit Chat at logical time 3" ; Timestamp = 3
+server.go:116: Sent name to joining : "Sigma" at logical time 2
+server.go:120: Participant Sigma joined Chit Chat at logical time 3
+client.go:24: Sigma ; T = 3 ; Server ; RecvName ; "Sigma" ; Timestamp = 2
+client.go:24: Sigma ; T = 4 ; Server ; Recv ; "Participant Sigma joined Chit Chat at logical time 3" ; Timestamp = 3
+server.go:116: Sent name to joining : "Sombra" at logical time 4
+server.go:120: Participant Sombra joined Chit Chat at logical time 5
+client.go:24: Sombra ; T = 5 ; Server ; RecvName ; "Sombra" ; Timestamp = 4
+client.go:24: Sombra ; T = 6 ; Server ; Recv ; "Participant Sombra joined Chit Chat at logical time 5" ; Timestamp = 5
+client.go:24: Sigma ; T = 6 ; Server ; Recv ; "Participant Sombra joined Chit Chat at logical time 5" ; Timestamp = 5
+server.go:116: Sent name to joining : "Mercy" at logical time 6
+server.go:120: Participant Mercy joined Chit Chat at logical time 7
+client.go:24: Mercy ; T = 7 ; Server ; RecvName ; "Mercy" ; Timestamp = 6
+client.go:24: Mercy ; T = 8 ; Server ; Recv ; "Participant Mercy joined Chit Chat at logical time 7" ; Timestamp = 7
+client.go:24: Sigma ; T = 8 ; Server ; Recv ; "Participant Mercy joined Chit Chat at logical time 7" ; Timestamp = 7
+client.go:24: Sombra ; T = 8 ; Server ; Recv ; "Participant Mercy joined Chit Chat at logical time 7" ; Timestamp = 7
+server.go:66: Server ; T = 10 ; Broadcast ; "hey" ; Timestamp = 9
+client.go:24: Sombra ; T = 10 ; Mercy ; Recv ; "hey" ; Timestamp = 9
+client.go:24: Sigma ; T = 10 ; Mercy ; Recv ; "hey" ; Timestamp = 9
+client.go:24: Mercy ; T = 9 ; Mercy ; Send ; "hey" ; Timestamp = 9
+client.go:24: Mercy ; T = 10 ; Mercy ; Recv ; "hey" ; Timestamp = 9
+server.go:66: Server ; T = 12 ; Broadcast ; "hey" ; Timestamp = 11
+client.go:24: Sombra ; T = 12 ; Mercy ; Recv ; "hey" ; Timestamp = 11
+client.go:24: Sigma ; T = 12 ; Mercy ; Recv ; "hey" ; Timestamp = 11
+server.go:142: Participant Mercy left Chit Chat at logical time 13
+client.go:24: Sigma ; T = 14 ; Server ; Recv ; "Participant Mercy left Chit Chat at logical time 13" ; Timestamp = 13
+client.go:24: Sombra ; T = 14 ; Server ; Recv ; "Participant Mercy left Chit Chat at logical time 13" ; Timestamp = 13
+server.go:116: Sent name to joining : "Soldier 76" at logical time 14
+server.go:120: Participant Soldier 76 joined Chit Chat at logical time 15
+client.go:24: Soldier 76 ; T = 15 ; Server ; RecvName ; "Soldier 76" ; Timestamp = 14
+client.go:24: Sigma ; T = 16 ; Server ; Recv ; "Participant Soldier 76 joined Chit Chat at logical time 15" ; Timestamp = 15
+client.go:24: Sombra ; T = 16 ; Server ; Recv ; "Participant Soldier 76 joined Chit Chat at logical time 15" ; Timestamp = 15
+client.go:24: Soldier 76 ; T = 16 ; Server ; Recv ; "Participant Soldier 76 joined Chit Chat at logical time 15" ; Timestamp = 15
+client.go:24: Soldier 76 ; T = 17 ; Soldier 76 ; Send ; "hey" ; Timestamp = 17
+server.go:66: Server ; T = 18 ; Broadcast ; "hey" ; Timestamp = 17
+client.go:24: Sombra ; T = 18 ; Soldier 76 ; Recv ; "hey" ; Timestamp = 17
+client.go:24: Sigma ; T = 18 ; Soldier 76 ; Recv ; "hey" ; Timestamp = 17
+client.go:24: Soldier 76 ; T = 18 ; Soldier 76 ; Recv ; "hey" ; Timestamp = 17

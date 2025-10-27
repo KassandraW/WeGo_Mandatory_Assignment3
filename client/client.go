@@ -17,10 +17,11 @@ import (
 // Lamport clock
 var lamportClock int32 = 0
 var lamportLock sync.Mutex
+var name string
 
 func log_event(event_type string, msg *proto.ChatMsg) {
-	fmt.Println(msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; " + event_type + " ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
-	log.Println(msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; " + event_type + " ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
+	fmt.Println(name + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; " + msg.Sender + " ; " + event_type + " ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
+	log.Println(name + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; " + msg.Sender + " ; " + event_type + " ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
 }
 
 func messageSendingLoop(client proto.ChitChatClient, name string) {
@@ -30,8 +31,8 @@ func messageSendingLoop(client proto.ChitChatClient, name string) {
 		lamportLock.Lock()   //update clock
 		lamportClock += 1
 		message := &proto.ChatMsg{Text: content, Sender: name, Timestamp: lamportClock}
-		client.PostMessage(context.Background(), message) // send the message
 		log_event("Send", message)
+		client.PostMessage(context.Background(), message) // send the message
 		lamportLock.Unlock()
 	}
 }
@@ -90,7 +91,7 @@ func main() {
 	//update lamport clock
 	lamportClock = max(lamportClock, name_msg.Timestamp) + 1
 
-	name := name_msg.Text
+	name = name_msg.Text
 	if name == "no names left" {
 		log.Println(strconv.Itoa(int(lamportClock)) + " : Unknown client failed to join the chat. Chatroom is full.")
 		return
