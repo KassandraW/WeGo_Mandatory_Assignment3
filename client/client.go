@@ -34,7 +34,7 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 		if msg != nil {
 			lamportLock.Lock()
 			lamportClock = max(lamportClock, msg.Timestamp) + 1 // sync the lamport clock
-			log.Println(msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; Recv ; \"" + msg.Text + "\"")  // if this truly was a message, print it out
+			log.Println(msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; Recv ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))  // if this truly was a message, print it out
 			lamportLock.Unlock()
 		}
 		if err != nil {
@@ -79,7 +79,7 @@ func main() {
 		fmt.Println(strconv.Itoa(int(lamportClock)) + " : the chat room is currently full! try again later.")
 		return
 	}
-	log.Println(name_msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) +  " ; RecvName ; \"" + name_msg.Text + "\"")
+	log.Println(name_msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) +  " ; RecvName ; \"" + name_msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(name_msg.Timestamp)))
 	lamportLock.Unlock()
 
 	running := true
