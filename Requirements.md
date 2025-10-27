@@ -97,24 +97,24 @@ interface; and ii) log the message content and its logical timestamp.
 
 - The system must log the following events:
 
-  * Server startup and shutdown
+  * Server startup and shutdown [mangler shutdown]
 
-  * Client connection and disconnection events
+  * Client connection and disconnection events [x]
 
-  * Broadcast of join/leave messages
+  * Broadcast of join/leave messages [x]
 
-  * Message delivery events
+  * Message delivery events [x]
 
 
 - Log messages must include:
 
-  * Timestamp
+  * Timestamp [x]
 
-  * Component name (Server/Client)
+  * Component name (Server/Client) [x]
 
-  * Event type
+  * Event type [x]
 
-  * Relevant identifiers (e.g. Client ID).
+  * Relevant identifiers (e.g. Client ID). [x]
 
 
 - The system can be started with at least three (3) nodes (two client
