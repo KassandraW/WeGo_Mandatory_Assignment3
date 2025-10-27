@@ -58,6 +58,10 @@ func (s *ChitChatServer) Broadcast(msg *proto.ChatMsg) {
 
 func (s *ChitChatServer) PostMessage(ctx context.Context, msg *proto.ChatMsg) (*proto.Empty, error) {
 	s.Broadcast(msg)
+	s.lock.Lock()
+	s.syncClock(msg.Timestamp)
+	log.Println("Server ; T = " + strconv.Itoa(int(s.lamportClock)) + " ; Broadcast ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
+	s.lock.Unlock()
 	return &proto.Empty{}, nil
 }
 
