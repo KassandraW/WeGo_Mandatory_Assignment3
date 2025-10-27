@@ -25,7 +25,7 @@ type ChitChatServer struct {
 
 type ClientWrapper struct {
 	name   string
-	stream proto.ChitChat_GetServerStreamServer
+	stream proto.ChitChat_JoinServer
 }
 
 func (s *ChitChatServer) chooseRandomName() string {
@@ -63,7 +63,7 @@ func (s *ChitChatServer) RemoveClient(target ClientWrapper) {
 	}
 }
 
-func (s *ChitChatServer) GetServerStream(timestamp *proto.Timestamp, stream proto.ChitChat_GetServerStreamServer) error {
+func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_JoinServer) error {
 	// lamport clock business
 	s.lock.Lock()
 	s.syncClock(timestamp.Timestamp)

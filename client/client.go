@@ -31,7 +31,7 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 		if msg != nil {
 			lamportLock.Lock()
 			lamportClock = max(lamportClock, msg.Timestamp) + 1                                 // sync the lamport clock
-			fmt.Println(strconv.Itoa(int(lamportClock)) + " : " + msg.Sender + ": " + msg.Text) // if this truly was a message, print it out
+			log.Println(strconv.Itoa(int(lamportClock)) + " : " + msg.Sender + ": " + msg.Text) // if this truly was a message, print it out
 			lamportLock.Unlock()
 		}
 		if err != nil {
@@ -56,8 +56,8 @@ func main() {
 	lamportLock.Lock()
 	lamportClock += 1
 
-	// step 2. poke the server to get a stream
-	stream, err := client.GetServerStream(context.Background(), &proto.Timestamp{Timestamp: lamportClock})
+	// step 2. Join the server
+	stream, err := client.Join(context.Background(), &proto.Timestamp{Timestamp: lamportClock})
 	if err != nil {
 		log.Fatalf("Connection was not established")
 	}

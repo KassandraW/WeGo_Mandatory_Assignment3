@@ -18,6 +18,6 @@ message Empty {}
 
 //Maintain rpc calls between server and client. 
 service ChitChat { 
-    rpc GetServerStream(Timestamp) returns (stream Chat_msg);
+    rpc Join(Timestamp) returns (stream Chat_msg);
     rpc PostMessage(Chat_msg) returns (Empty);
 }
