@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"sync"
 	"time"
@@ -51,11 +52,23 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 }
 
 func main() {
+	filepath := "../grpc/Log_info"
+	Log_File, err := os.OpenFile(filepath, os.O_CREATE |os.O_WRONLY| os.O_APPEND,0666) // create file if not exist|open file for writing | new issue goes to button no overwriting 
+		if (err != nil){
+			log.Fatal("could not open log file client: %v", err)
+		}
+		defer Log_File.Close()
+			
+	log.SetOutput(Log_File)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+	conn, err := grpc.NewClient("localhost:5050", grpc.WithTransportCredentials(insecure.NewCredentials())) //connects to server at localhost:5050. Insecure.newcredentials is used to skip TLS encryption for simplification
 	// connect to server at localhost:5050. Insecure.newcredentials is used to skip TLS encryption for simplification
 	conn, err := grpc.NewClient("localhost:5050", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("Not working")
 	}
+	
+	
 
 	// create a client that can call RPC methods defined in the ChitChat service.
 	client := proto.NewChitChatClient(conn)

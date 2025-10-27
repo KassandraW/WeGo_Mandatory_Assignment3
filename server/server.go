@@ -7,6 +7,8 @@ import (
 	"log"
 	"math/rand"
 	"net"
+	"os"
+	"sync"
 	"strconv"
 	"sync"
 	"time"
@@ -143,6 +145,17 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 	}
 }
 
+func main() { //initializes server
+filepath := "../grpc/Log_info"
+	// creating a seperate log file : used this guide : https://last9.io/blog/write-logs-to-file/
+ Log_File, err := os.OpenFile(filepath, os.O_CREATE |os.O_WRONLY| os.O_APPEND,0666) // create file if not exist|open file for writing | new issue goes to button no overwriting 
+		if (err != nil){
+			log.Fatal("could not open log file: %v", err)
+		}
+		defer Log_File.Close()
+
+	log.SetOutput(Log_File)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 func (s *ChitChatServer) syncClock(clientClock int32) {
 	if clientClock > s.lamportClock {
 		s.lamportClock = clientClock
@@ -159,6 +172,7 @@ func main() { //initializes server
 	log.Println("The ChitChat Server is now up and runnning at logical time " + strconv.Itoa(int(server.lamportClock)))
 	server.lock.Unlock()
 	server.start_server() //starts the gRPC server
+	
 }
 
 func (s *ChitChatServer) start_server() {
@@ -167,6 +181,7 @@ func (s *ChitChatServer) start_server() {
 	if err != nil {
 		log.Fatalf("Did not work")
 	}
+
 	proto.RegisterChitChatServer(grpcServer, s) //registers the server implementation with gRPC
 	go func() {
 		for {
@@ -195,4 +210,8 @@ func (s *ChitChatServer) start_server() {
 	if err != nil {
 		log.Fatalf("Did not work")
 	}
+
 }
+
+
+
