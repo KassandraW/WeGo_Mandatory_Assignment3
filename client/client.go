@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"time"
-
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -37,6 +36,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Not working")
 	}
+	
+	
 
 	client := proto.NewChitChatClient(conn) //creates a client that can call RPC methods defined in the ChitChat service.
 	// Establish connection stream to recaive messages from server
@@ -50,6 +51,7 @@ func main() {
 		fmt.Println("the chat room is currently full! try again later.")
 	} else {
 		fmt.Println("welcome to the chatroom! your name for this session is: " + name)
+		log.Println("welcome to the chatroom! your name for this session is: " + name)
 	}
 
 	running := true

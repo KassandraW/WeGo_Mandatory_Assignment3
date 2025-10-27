@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net"
 	"sync"
+	"os"
 
 	"google.golang.org/grpc"
 )
@@ -24,6 +25,9 @@ type ClientWrapper struct {
 	name   string
 	stream proto.ChitChat_ServerStreamServer
 }
+
+// creating a seperate log file : used this guide : https://last9.io/blog/write-logs-to-file/
+var Log_File, err = os.OpenFile("Log_info", os.O_CREATE |os.O_WRONLY| os.O_APPEND,0666) // create file if not exist|open file for writing | new issue goes to button no overwriting 
 
 var anonymous_client_names = []string{"Mercy", "Ana", "Lucio", "Reinhart", "Roadhog", "Sigma", "Soldier 76", "Ashe", "Sombra"}
 
@@ -85,9 +89,19 @@ func (s *ChitChatServer) ServerStream(request *proto.Chat_Request, stream proto.
 
 func main() { //initializes server
 
+		if (err != nil){
+			log.Fatal("could not open log file: %v", err)
+		}
+		defer Log_File.Close()
+
+	log.SetOutput(Log_File)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
 	server := &ChitChatServer{anonymous_client_names: anonymous_client_names}
 	fmt.Printf("ChitChat Server is up and runnning.\n")
+	log.Print("server start started")
 	server.start_server() //starts the gRPC server
+	
 }
 
 func (s *ChitChatServer) start_server() {
@@ -96,6 +110,7 @@ func (s *ChitChatServer) start_server() {
 	if err != nil {
 		log.Fatalf("Did not work")
 	}
+
 	proto.RegisterChitChatServer(grpcServer, s) //registers the server implementation with gRPC
 	err = grpcServer.Serve(listener)            // starts serving incoming requests
 	if err != nil {
