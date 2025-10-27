@@ -103,7 +103,7 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 
 	// Send the assigned name to the joining client (uses the pre-increment timestamp)
 	stream.Send(&proto.ChatMsg{Text: name, Sender: "Server", Timestamp: lamportBefore})
-	log.Println("Sent name to joining client with message : \"" + name + "\" at logical time " + strconv.Itoa(int(lamportBefore)))
+	log.Println("Sent name to joining : \"" + name + "\" at logical time " + strconv.Itoa(int(lamportBefore)))
 
 	// Log and broadcast the join (does not hold the server lock)
 	log.Println("Participant " + name + " joined Chit Chat at logical time " + strconv.Itoa(int(broadcastTS)))

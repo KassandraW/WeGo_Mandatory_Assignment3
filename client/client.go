@@ -24,6 +24,7 @@ func messageSendingLoop(client proto.ChitChatClient, name string) {
 		lamportLock.Lock() //update clock
 		lamportClock += 1                                                             
 		client.PostMessage(context.Background(), &proto.ChatMsg{Text: content, Sender: name, Timestamp: lamportClock}) // send the message
+		log.Println(name + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; Send ; \"" + content + "\" ; Timestamp = " + strconv.Itoa(int(lamportClock)))
 		lamportLock.Unlock()
 	}
 }
