@@ -20,18 +20,21 @@ var lamportLock sync.Mutex
 func messageSendingLoop(client proto.ChitChatClient, name string) {
 	var content string // the string to contain the message to be sent
 	for {
-		fmt.Scanln(&content)                                                                  // capture input from the client
-		client.PostMessage(context.Background(), &proto.ChatMsg{Text: content, Sender: name}) // send the message
+		fmt.Scanln(&content) // capture input from the client
+		lamportLock.Lock() //update clock
+		lamportClock += 1                                                             
+		client.PostMessage(context.Background(), &proto.ChatMsg{Text: content, Sender: name, Timestamp: lamportClock}) // send the message
+		lamportLock.Unlock()
 	}
 }
 
 func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], running *bool) {
 	for {
-		msg, err := stream.Recv() // get some message
+		msg, err := stream.Recv() // check for a message
 		if msg != nil {
 			lamportLock.Lock()
-			lamportClock = max(lamportClock, msg.Timestamp) + 1                                 // sync the lamport clock
-			log.Println(strconv.Itoa(int(lamportClock)) + " : " + msg.Sender + ": " + msg.Text) // if this truly was a message, print it out
+			lamportClock = max(lamportClock, msg.Timestamp) + 1 // sync the lamport clock
+			log.Println(msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; Recv ; \"" + msg.Text + "\"")  // if this truly was a message, print it out
 			lamportLock.Unlock()
 		}
 		if err != nil {
@@ -51,7 +54,7 @@ func main() {
 	// create a client that can call RPC methods defined in the ChitChat service.
 	client := proto.NewChitChatClient(conn)
 
-	// establish connection stream to receive messages from server
+	// --- Join the chat ---
 	// step 1. increment lamport clock
 	lamportLock.Lock()
 	lamportClock += 1
@@ -69,15 +72,17 @@ func main() {
 	if err != nil {
 		log.Fatalf("Failed to receive message")
 	}
+
+	//update lamport clock
 	lamportLock.Lock()
 	lamportClock = max(lamportClock, name_msg.Timestamp) + 1
 
 	name := name_msg.Text
 	if name == "no names left" {
 		fmt.Println(strconv.Itoa(int(lamportClock)) + " : the chat room is currently full! try again later.")
-	} else {
-		fmt.Println(strconv.Itoa(int(lamportClock)) + " : welcome to the chatroom! your name for this session is: " + name)
+		return
 	}
+	log.Println(name_msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) +  " ; RecvName ; \"" + name_msg.Text + "\"")
 	lamportLock.Unlock()
 
 	running := true
