@@ -3,6 +3,7 @@ package main
 import (
 	proto "ChitChatServer/grpc"
 	"context"
+	"fmt"
 	"log"
 	"math/rand"
 	"net"
@@ -86,7 +87,10 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 	if name == "no names left" {
 		// reply with the current logical time and exit
 		s.lock.Unlock()
-		stream.Send(&proto.ChatMsg{Text: name, Sender: "Server", Timestamp: lamportBefore})
+		stream.Send(&proto.ChatMsg{
+			Text:      name,
+			Sender:    "Server",
+			Timestamp: lamportBefore})
 		return nil
 	}
 
@@ -102,7 +106,10 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 	s.lock.Unlock()
 
 	// Send the assigned name to the joining client (uses the pre-increment timestamp)
-	stream.Send(&proto.ChatMsg{Text: name, Sender: "Server", Timestamp: lamportBefore})
+	stream.Send(&proto.ChatMsg{
+		Text:      name,
+		Sender:    "Server",
+		Timestamp: lamportBefore})
 	log.Println("Sent name to joining : \"" + name + "\" at logical time " + strconv.Itoa(int(lamportBefore)))
 
 	// Log and broadcast the join (does not hold the server lock)
@@ -119,7 +126,10 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 			s.recycleName(name)
 			s.lamportClock += 1
 			leftTS := s.lamportClock
-			leftMsg := &proto.ChatMsg{Text: "Participant " + name + " left Chit Chat at logical time " + strconv.Itoa(int(leftTS)), Sender: "Server", Timestamp: leftTS}
+			leftMsg := &proto.ChatMsg{
+				Text:      "Participant " + name + " left Chit Chat at logical time " + strconv.Itoa(int(leftTS)),
+				Sender:    "Server",
+				Timestamp: leftTS}
 			s.lock.Unlock()
 
 			// log and broadcast without holding the lock
@@ -158,7 +168,30 @@ func (s *ChitChatServer) start_server() {
 		log.Fatalf("Did not work")
 	}
 	proto.RegisterChitChatServer(grpcServer, s) //registers the server implementation with gRPC
-	err = grpcServer.Serve(listener)            // starts serving incoming requests
+	go func() {
+		for {
+			var content string
+			fmt.Scanln(&content)
+			if content == "exit" {
+				s.lock.Lock()
+				s.lamportClock += 1
+				log.Println("The ChitChat Server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)))
+				fmt.Println("Please enter Ctrl + C to completely shut down.")
+				shutdown_message := &proto.ChatMsg{
+					Text:      "The ChitChat Server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)),
+					Sender:    "server",
+					Timestamp: s.lamportClock,
+				}
+				s.Broadcast(shutdown_message)
+				s.lock.Unlock()
+				time.Sleep(3 * time.Second)
+				grpcServer.GracefulStop() //the server is now closed for rpc calls
+				listener.Close()
+				return
+			}
+		}
+	}()
+	err = grpcServer.Serve(listener) // starts serving incoming requests
 	if err != nil {
 		log.Fatalf("Did not work")
 	}
