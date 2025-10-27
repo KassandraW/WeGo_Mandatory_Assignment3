@@ -59,12 +59,15 @@ func (s *ChitChatServer) Broadcast(msg *proto.ChatMsg) {
 }
 
 func (s *ChitChatServer) PostMessage(ctx context.Context, msg *proto.ChatMsg) (*proto.Empty, error) {
-	s.Broadcast(msg)
+	// sync server clock with incoming message
 	s.lock.Lock()
 	s.syncClock(msg.Timestamp)
+
 	fmt.Println("Server ; T = " + strconv.Itoa(int(s.lamportClock)) + " ; Broadcast ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
 	log.Println("Server ; T = " + strconv.Itoa(int(s.lamportClock)) + " ; Broadcast ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
 	s.lock.Unlock()
+
+	s.Broadcast(msg)
 	return &proto.Empty{}, nil
 }
 
@@ -81,7 +84,7 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 	s.lock.Lock()
 	s.syncClock(timestamp.Timestamp)
 	lamportBefore := s.lamportClock // timestamp used for the name message
-
+	log.Println("Server received request to join at logical time " + strconv.Itoa(int(s.lamportClock)) + " with the timestamp " + strconv.Itoa(int(timestamp.Timestamp)))
 	// give the client a name and determine if they can join
 	name := s.chooseRandomName()
 	new_client := ClientWrapper{name: name, stream: stream}

@@ -20,8 +20,8 @@ var lamportLock sync.Mutex
 var name string
 
 func log_event(event_type string, msg *proto.ChatMsg) {
-	fmt.Println(name + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; " + msg.Sender + " ; " + event_type + " ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
-	log.Println(name + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; " + msg.Sender + " ; " + event_type + " ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
+	fmt.Println(name + " " + event_type + " from " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)) + " : \"" + msg.Text + "\" and timestamp " + strconv.Itoa(int(msg.Timestamp)))
+	log.Println(name + " " + event_type + " from " + msg.Sender + " at logical time " + strconv.Itoa(int(lamportClock)) + " : \"" + msg.Text + "\" and timestamp " + strconv.Itoa(int(msg.Timestamp)))
 }
 
 func messageSendingLoop(client proto.ChitChatClient, name string) {
@@ -31,7 +31,7 @@ func messageSendingLoop(client proto.ChitChatClient, name string) {
 		lamportLock.Lock()   //update clock
 		lamportClock += 1
 		message := &proto.ChatMsg{Text: content, Sender: name, Timestamp: lamportClock}
-		log_event("Send", message)
+		log_event("sent a message", message)
 		client.PostMessage(context.Background(), message) // send the message
 		lamportLock.Unlock()
 	}
@@ -43,7 +43,7 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 		if msg != nil {
 			lamportLock.Lock()
 			lamportClock = max(lamportClock, msg.Timestamp) + 1 // sync the lamport clock
-			log_event("Recv", msg)
+			log_event("recieved a message", msg)
 			lamportLock.Unlock()
 		}
 		if err != nil {
@@ -54,6 +54,7 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 }
 
 func main() {
+	// --- Setup logging ---
 	filepath := "../grpc/Log_info"
 	Log_File, err := os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666) // create file if not exist|open file for writing | new issue goes to button no overwriting
 	if err != nil {
@@ -71,32 +72,32 @@ func main() {
 	// create a client that can call RPC methods defined in the ChitChat service.
 	client := proto.NewChitChatClient(conn)
 
-	// --- Join the chat ---
-	// step 1. increment lamport clock
+	// Event 1 -- Client Join
 	lamportLock.Lock()
 	lamportClock += 1
 
-	// step 2. Join the server
+	fmt.Println("Client has sent a join request to the server at logical time " + strconv.Itoa(int(lamportClock)))
+	log.Println("Client has sent a join request to the server at logical time " + strconv.Itoa(int(lamportClock)))
 	stream, err := client.Join(context.Background(), &proto.Timestamp{Timestamp: lamportClock})
 	if err != nil {
 		log.Fatalf("Connection was not established")
 	}
 
-	// receive our name for the session
+	// Event 2 -- Receive Name from Server
+
 	name_msg, err := stream.Recv()
 	if err != nil {
 		log.Fatalf("Failed to receive message")
 	}
 
-	//update lamport clock
-	lamportClock = max(lamportClock, name_msg.Timestamp) + 1
-
 	name = name_msg.Text
 	if name == "no names left" {
-		log.Println(strconv.Itoa(int(lamportClock)) + " : Unknown client failed to join the chat. Chatroom is full.")
+		log.Println(strconv.Itoa(int(lamportClock)) + " : Client failed to join the chat. Chatroom is full.")
 		return
 	}
-	log_event("RecvName", name_msg)
+
+	lamportClock = max(lamportClock, name_msg.Timestamp) + 1
+	log_event("received a name", name_msg)
 	lamportLock.Unlock()
 
 	running := true
