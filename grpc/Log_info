@@ -1,2 +1,5 @@
-2025/10/27 15:30:54 server.go:101: server start started
-2025/10/27 15:31:01 client.go:65: welcome to the chatroom! your name for this session is: Lucio
+server.go:182: The ChitChat Server is now up and runnning at logical time 1
+server.go:116: Sent name to joining : "Ana" at logical time 2
+server.go:120: Participant Ana joined Chit Chat at logical time 3
+client.go:23: Server ; T = 3 ; RecvName ; "Ana" ; Timestamp = 2
+client.go:23: Server ; T = 4 ; Recv ; "Participant Ana joined Chit Chat at logical time 3" ; Timestamp = 3

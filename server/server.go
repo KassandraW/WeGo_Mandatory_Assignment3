@@ -8,7 +8,6 @@ import (
 	"math/rand"
 	"net"
 	"os"
-	"sync"
 	"strconv"
 	"sync"
 	"time"
@@ -63,6 +62,7 @@ func (s *ChitChatServer) PostMessage(ctx context.Context, msg *proto.ChatMsg) (*
 	s.Broadcast(msg)
 	s.lock.Lock()
 	s.syncClock(msg.Timestamp)
+	fmt.Println("Server ; T = " + strconv.Itoa(int(s.lamportClock)) + " ; Broadcast ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
 	log.Println("Server ; T = " + strconv.Itoa(int(s.lamportClock)) + " ; Broadcast ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
 	s.lock.Unlock()
 	return &proto.Empty{}, nil
@@ -112,9 +112,11 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 		Text:      name,
 		Sender:    "Server",
 		Timestamp: lamportBefore})
+	fmt.Println("Sent name to joining : \"" + name + "\" at logical time " + strconv.Itoa(int(lamportBefore)))
 	log.Println("Sent name to joining : \"" + name + "\" at logical time " + strconv.Itoa(int(lamportBefore)))
 
 	// Log and broadcast the join (does not hold the server lock)
+	fmt.Println("Participant " + name + " joined Chit Chat at logical time " + strconv.Itoa(int(broadcastTS)))
 	log.Println("Participant " + name + " joined Chit Chat at logical time " + strconv.Itoa(int(broadcastTS)))
 	s.Broadcast(broadcastMsg)
 
@@ -135,7 +137,9 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 			s.lock.Unlock()
 
 			// log and broadcast without holding the lock
-			log.Println("Participant " + name + " left Chit Chat at logical time " + strconv.Itoa(int(leftTS)))
+			message := "Participant " + name + " left Chit Chat at logical time " + strconv.Itoa(int(leftTS))
+			fmt.Println(message)
+			log.Println(message)
 			s.Broadcast(leftMsg)
 			return nil
 
@@ -145,17 +149,6 @@ func (s *ChitChatServer) Join(timestamp *proto.Timestamp, stream proto.ChitChat_
 	}
 }
 
-func main() { //initializes server
-filepath := "../grpc/Log_info"
-	// creating a seperate log file : used this guide : https://last9.io/blog/write-logs-to-file/
- Log_File, err := os.OpenFile(filepath, os.O_CREATE |os.O_WRONLY| os.O_APPEND,0666) // create file if not exist|open file for writing | new issue goes to button no overwriting 
-		if (err != nil){
-			log.Fatal("could not open log file: %v", err)
-		}
-		defer Log_File.Close()
-
-	log.SetOutput(Log_File)
-	log.SetFlags(log.LstdFlags | log.Lshortfile)
 func (s *ChitChatServer) syncClock(clientClock int32) {
 	if clientClock > s.lamportClock {
 		s.lamportClock = clientClock
@@ -164,15 +157,32 @@ func (s *ChitChatServer) syncClock(clientClock int32) {
 }
 
 func main() { //initializes server
+	// Instantiate Log file using this guide : https://last9.io/blog/write-logs-to-file/
+	filepath := "../grpc/Log_info"
+
+	Log_File, err := os.OpenFile(filepath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666) // create file if not exist|open file for writing | new issue goes to button no overwriting
+	if err != nil {
+		log.Fatalf("could not open log file: %v", err)
+	}
+	if err := os.Truncate(filepath, 0); // clear the log file on each run
+	err != nil {
+		log.Printf("Failed to truncate: %v", err)
+	}
+	defer Log_File.Close()
+
+	log.SetOutput(Log_File)
+	log.SetFlags(log.Lshortfile)
+
 	var anonymous_client_names = []string{"Mercy", "Ana", "Lucio", "Reinhardt", "Roadhog", "Sigma", "Soldier 76", "Ashe", "Sombra"}
 	server := &ChitChatServer{anonymous_client_names: anonymous_client_names}
 	server.lamportClock = 0
 	server.lock.Lock()
 	server.lamportClock += 1
+	fmt.Println("The ChitChat Server is now up and runnning at logical time " + strconv.Itoa(int(server.lamportClock)))
 	log.Println("The ChitChat Server is now up and runnning at logical time " + strconv.Itoa(int(server.lamportClock)))
 	server.lock.Unlock()
 	server.start_server() //starts the gRPC server
-	
+
 }
 
 func (s *ChitChatServer) start_server() {
@@ -190,6 +200,7 @@ func (s *ChitChatServer) start_server() {
 			if content == "exit" {
 				s.lock.Lock()
 				s.lamportClock += 1
+				fmt.Println("The ChitChat Server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)))
 				log.Println("The ChitChat Server is shutting down at logical time " + strconv.Itoa(int(s.lamportClock)))
 				fmt.Println("Please enter Ctrl + C to completely shut down.")
 				shutdown_message := &proto.ChatMsg{
@@ -212,6 +223,3 @@ func (s *ChitChatServer) start_server() {
 	}
 
 }
-
-
-
