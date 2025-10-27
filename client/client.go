@@ -17,14 +17,19 @@ import (
 var lamportClock int32 = 0
 var lamportLock sync.Mutex
 
+func log_event(event_type string, msg *proto.ChatMsg) {
+	log.Println(msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; " + event_type + " ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))
+}
+
 func messageSendingLoop(client proto.ChitChatClient, name string) {
 	var content string // the string to contain the message to be sent
 	for {
 		fmt.Scanln(&content) // capture input from the client
-		lamportLock.Lock() //update clock
-		lamportClock += 1                                                             
-		client.PostMessage(context.Background(), &proto.ChatMsg{Text: content, Sender: name, Timestamp: lamportClock}) // send the message
-		log.Println(name + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; Send ; \"" + content + "\" ; Timestamp = " + strconv.Itoa(int(lamportClock)))
+		lamportLock.Lock()   //update clock
+		lamportClock += 1
+		message := &proto.ChatMsg{Text: content, Sender: name, Timestamp: lamportClock}
+		client.PostMessage(context.Background(), message) // send the message
+		log_event("Send", message)
 		lamportLock.Unlock()
 	}
 }
@@ -35,7 +40,7 @@ func messageReceivingLoop(stream grpc.ServerStreamingClient[proto.ChatMsg], runn
 		if msg != nil {
 			lamportLock.Lock()
 			lamportClock = max(lamportClock, msg.Timestamp) + 1 // sync the lamport clock
-			log.Println(msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) + " ; Recv ; \"" + msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(msg.Timestamp)))  // if this truly was a message, print it out
+			log_event("Recv", msg)
 			lamportLock.Unlock()
 		}
 		if err != nil {
@@ -77,10 +82,10 @@ func main() {
 
 	name := name_msg.Text
 	if name == "no names left" {
-		fmt.Println(strconv.Itoa(int(lamportClock)) + " : the chat room is currently full! try again later.")
+		log.Println(strconv.Itoa(int(lamportClock)) + " : Unknown client failed to join the chat. Chatroom is full.")
 		return
 	}
-	log.Println(name_msg.Sender + " ; T = " + strconv.Itoa(int(lamportClock)) +  " ; RecvName ; \"" + name_msg.Text + "\" ; Timestamp = " + strconv.Itoa(int(name_msg.Timestamp)))
+	log_event("RecvName", name_msg)
 	lamportLock.Unlock()
 
 	running := true

@@ -145,7 +145,7 @@ func main() { //initializes server
 	server := &ChitChatServer{anonymous_client_names: anonymous_client_names}
 	server.lamportClock = 0
 	server.lock.Lock()
-	server.lamportClock += 1 
+	server.lamportClock += 1
 	log.Println("The ChitChat Server is now up and runnning at logical time " + strconv.Itoa(int(server.lamportClock)))
 	server.lock.Unlock()
 	server.start_server() //starts the gRPC server
