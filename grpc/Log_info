@@ -1,28 +1,10 @@
-server.go:182: The ChitChat Server is now up and runnning at logical time 1
-server.go:116: Sent name to joining : "Mercy" at logical time 2
-server.go:120: Participant Mercy joined Chit Chat at logical time 3
-client.go:24: Mercy ; T = 3 ; Server ; RecvName ; "Mercy" ; Timestamp = 2
-client.go:24: Mercy ; T = 4 ; Server ; Recv ; "Participant Mercy joined Chit Chat at logical time 3" ; Timestamp = 3
-server.go:116: Sent name to joining : "Ana" at logical time 4
-server.go:120: Participant Ana joined Chit Chat at logical time 5
-client.go:24: Ana ; T = 5 ; Server ; RecvName ; "Ana" ; Timestamp = 4
-client.go:24: Mercy ; T = 6 ; Server ; Recv ; "Participant Ana joined Chit Chat at logical time 5" ; Timestamp = 5
-client.go:24: Ana ; T = 6 ; Server ; Recv ; "Participant Ana joined Chit Chat at logical time 5" ; Timestamp = 5
-client.go:24: Ana ; T = 7 ; Ana ; Send ; "hey" ; Timestamp = 7
-server.go:66: Server ; T = 8 ; Broadcast ; "hey" ; Timestamp = 7
-client.go:24: Mercy ; T = 8 ; Ana ; Recv ; "hey" ; Timestamp = 7
-client.go:24: Ana ; T = 8 ; Ana ; Recv ; "hey" ; Timestamp = 7
-client.go:24: Mercy ; T = 9 ; Mercy ; Send ; "hey" ; Timestamp = 9
-server.go:66: Server ; T = 10 ; Broadcast ; "hey" ; Timestamp = 9
-client.go:24: Ana ; T = 10 ; Mercy ; Recv ; "hey" ; Timestamp = 9
-client.go:24: Mercy ; T = 10 ; Mercy ; Recv ; "hey" ; Timestamp = 9
-client.go:24: Mercy ; T = 11 ; Mercy ; Send ; "here" ; Timestamp = 11
-server.go:66: Server ; T = 12 ; Broadcast ; "here" ; Timestamp = 11
-client.go:24: Mercy ; T = 12 ; Mercy ; Recv ; "here" ; Timestamp = 11
-client.go:24: Ana ; T = 12 ; Mercy ; Recv ; "here" ; Timestamp = 11
-client.go:24: Ana ; T = 13 ; Ana ; Send ; "hey" ; Timestamp = 13
-server.go:66: Server ; T = 14 ; Broadcast ; "hey" ; Timestamp = 13
-client.go:24: Mercy ; T = 14 ; Ana ; Recv ; "hey" ; Timestamp = 13
-server.go:142: Participant Ana left Chit Chat at logical time 15
-client.go:24: Mercy ; T = 16 ; Server ; Recv ; "Participant Ana left Chit Chat at logical time 15" ; Timestamp = 15
-server.go:204: The ChitChat Server is shutting down at logical time 16
+server.go:185: The ChitChat Server is now up and runnning at logical time 1
+client.go:80: Client has sent a join request to the server at logical time 1
+server.go:87: Server received request to join at logical time 2 with the timestamp 1
+server.go:119: Sent name to joining : "Soldier 76" at logical time 2
+server.go:123: Participant Soldier 76 joined Chit Chat at logical time 3
+client.go:24: Soldier 76 received a name from Server at logical time 3 : "Soldier 76" and timestamp 2
+client.go:24: Soldier 76 recieved a message from Server at logical time 4 : "Participant Soldier 76 joined Chit Chat at logical time 3" and timestamp 3
+client.go:24: Soldier 76 sent a message from Soldier 76 at logical time 5 : "hey" and timestamp 5
+server.go:67: Server ; T = 6 ; Broadcast ; "hey" ; Timestamp = 5
+client.go:24: Soldier 76 recieved a message from Soldier 76 at logical time 6 : "hey" and timestamp 5

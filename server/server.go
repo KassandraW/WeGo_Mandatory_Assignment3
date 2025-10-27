@@ -181,8 +181,8 @@ func main() { //initializes server
 	server.lamportClock = 0
 	server.lock.Lock()
 	server.lamportClock += 1
-	fmt.Println("The ChitChat Server is now up and runnning at logical time " + strconv.Itoa(int(server.lamportClock)))
-	log.Println("The ChitChat Server is now up and runnning at logical time " + strconv.Itoa(int(server.lamportClock)))
+	fmt.Println("The ChitChat Server is now up and running at logical time " + strconv.Itoa(int(server.lamportClock)))
+	log.Println("The ChitChat Server is now up and running at logical time " + strconv.Itoa(int(server.lamportClock)))
 	server.lock.Unlock()
 	server.start_server() //starts the gRPC server
 
