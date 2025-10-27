@@ -7,9 +7,8 @@ import (
 	"log"
 	"math/rand"
 	"net"
-	"sync"
 	"os"
-
+	"sync"
 	"google.golang.org/grpc"
 )
 
@@ -26,8 +25,6 @@ type ClientWrapper struct {
 	stream proto.ChitChat_ServerStreamServer
 }
 
-// creating a seperate log file : used this guide : https://last9.io/blog/write-logs-to-file/
-var Log_File, err = os.OpenFile("Log_info", os.O_CREATE |os.O_WRONLY| os.O_APPEND,0666) // create file if not exist|open file for writing | new issue goes to button no overwriting 
 
 var anonymous_client_names = []string{"Mercy", "Ana", "Lucio", "Reinhart", "Roadhog", "Sigma", "Soldier 76", "Ashe", "Sombra"}
 
@@ -88,7 +85,9 @@ func (s *ChitChatServer) ServerStream(request *proto.Chat_Request, stream proto.
 }
 
 func main() { //initializes server
-
+filepath := "../grpc/Log_info"
+	// creating a seperate log file : used this guide : https://last9.io/blog/write-logs-to-file/
+ Log_File, err := os.OpenFile(filepath, os.O_CREATE |os.O_WRONLY| os.O_APPEND,0666) // create file if not exist|open file for writing | new issue goes to button no overwriting 
 		if (err != nil){
 			log.Fatal("could not open log file: %v", err)
 		}
@@ -116,4 +115,8 @@ func (s *ChitChatServer) start_server() {
 	if err != nil {
 		log.Fatalf("Did not work")
 	}
+
 }
+
+
+
