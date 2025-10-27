@@ -7,16 +7,17 @@ option go_package = "ChitChatServer/grpc/proto";
 message Chat_msg {
     string text = 1;
     string sender = 2;
+    int32 timestamp = 3;
 }
 
-message Chat_Request { //Placeholder message, we are probably gonna replace it with some lamport clock
-    string greeting = 1; 
+message Timestamp {
+    int32 timestamp = 1; 
 }
 
 message Empty {}
 
 //Maintain rpc calls between server and client. 
 service ChitChat { 
-    rpc ServerStream(Chat_Request) returns (stream Chat_msg);
+    rpc Join(Timestamp) returns (stream Chat_msg);
     rpc PostMessage(Chat_msg) returns (Empty);
 }
