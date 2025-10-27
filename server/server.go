@@ -224,5 +224,4 @@ func (s *ChitChatServer) start_server() {
 	if err != nil {
 		log.Fatalf("Did not work")
 	}
-
 }
