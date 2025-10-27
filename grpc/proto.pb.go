@@ -25,6 +25,7 @@ type ChatMsg struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Text          string                 `protobuf:"bytes,1,opt,name=text,proto3" json:"text,omitempty"`
 	Sender        string                 `protobuf:"bytes,2,opt,name=sender,proto3" json:"sender,omitempty"`
+	Timestamp     int32                  `protobuf:"varint,3,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -73,27 +74,34 @@ func (x *ChatMsg) GetSender() string {
 	return ""
 }
 
-type Chat_Request struct {
+func (x *ChatMsg) GetTimestamp() int32 {
+	if x != nil {
+		return x.Timestamp
+	}
+	return 0
+}
+
+type Timestamp struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
-	Greeting      string                 `protobuf:"bytes,1,opt,name=greeting,proto3" json:"greeting,omitempty"`
+	Timestamp     int32                  `protobuf:"varint,1,opt,name=timestamp,proto3" json:"timestamp,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
 
-func (x *Chat_Request) Reset() {
-	*x = Chat_Request{}
+func (x *Timestamp) Reset() {
+	*x = Timestamp{}
 	mi := &file_proto_proto_msgTypes[1]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
 
-func (x *Chat_Request) String() string {
+func (x *Timestamp) String() string {
 	return protoimpl.X.MessageStringOf(x)
 }
 
-func (*Chat_Request) ProtoMessage() {}
+func (*Timestamp) ProtoMessage() {}
 
-func (x *Chat_Request) ProtoReflect() protoreflect.Message {
+func (x *Timestamp) ProtoReflect() protoreflect.Message {
 	mi := &file_proto_proto_msgTypes[1]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
@@ -105,16 +113,16 @@ func (x *Chat_Request) ProtoReflect() protoreflect.Message {
 	return mi.MessageOf(x)
 }
 
-// Deprecated: Use Chat_Request.ProtoReflect.Descriptor instead.
-func (*Chat_Request) Descriptor() ([]byte, []int) {
+// Deprecated: Use Timestamp.ProtoReflect.Descriptor instead.
+func (*Timestamp) Descriptor() ([]byte, []int) {
 	return file_proto_proto_rawDescGZIP(), []int{1}
 }
 
-func (x *Chat_Request) GetGreeting() string {
+func (x *Timestamp) GetTimestamp() int32 {
 	if x != nil {
-		return x.Greeting
+		return x.Timestamp
 	}
-	return ""
+	return 0
 }
 
 type Empty struct {
@@ -157,15 +165,17 @@ var File_proto_proto protoreflect.FileDescriptor
 
 const file_proto_proto_rawDesc = "" +
 	"\n" +
-	"\vproto.proto\"6\n" +
+	"\vproto.proto\"T\n" +
 	"\bChat_msg\x12\x12\n" +
 	"\x04text\x18\x01 \x01(\tR\x04text\x12\x16\n" +
-	"\x06sender\x18\x02 \x01(\tR\x06sender\"*\n" +
-	"\fChat_Request\x12\x1a\n" +
-	"\bgreeting\x18\x01 \x01(\tR\bgreeting\"\a\n" +
-	"\x05Empty2X\n" +
-	"\bChitChat\x12*\n" +
-	"\fServerStream\x12\r.Chat_Request\x1a\t.Chat_msg0\x01\x12 \n" +
+	"\x06sender\x18\x02 \x01(\tR\x06sender\x12\x1c\n" +
+	"\ttimestamp\x18\x03 \x01(\x05R\ttimestamp\")\n" +
+	"\tTimestamp\x12\x1c\n" +
+	"\ttimestamp\x18\x01 \x01(\x05R\ttimestamp\"\a\n" +
+	"\x05Empty2M\n" +
+	"\bChitChat\x12\x1f\n" +
+	"\x04Join\x12\n" +
+	".Timestamp\x1a\t.Chat_msg0\x01\x12 \n" +
 	"\vPostMessage\x12\t.Chat_msg\x1a\x06.EmptyB\x1bZ\x19ChitChatServer/grpc/protob\x06proto3"
 
 var (
@@ -182,14 +192,14 @@ func file_proto_proto_rawDescGZIP() []byte {
 
 var file_proto_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_proto_proto_goTypes = []any{
-	(*ChatMsg)(nil),      // 0: Chat_msg
-	(*Chat_Request)(nil), // 1: Chat_Request
-	(*Empty)(nil),        // 2: Empty
+	(*ChatMsg)(nil),   // 0: Chat_msg
+	(*Timestamp)(nil), // 1: Timestamp
+	(*Empty)(nil),     // 2: Empty
 }
 var file_proto_proto_depIdxs = []int32{
-	1, // 0: ChitChat.ServerStream:input_type -> Chat_Request
+	1, // 0: ChitChat.Join:input_type -> Timestamp
 	0, // 1: ChitChat.PostMessage:input_type -> Chat_msg
-	0, // 2: ChitChat.ServerStream:output_type -> Chat_msg
+	0, // 2: ChitChat.Join:output_type -> Chat_msg
 	2, // 3: ChitChat.PostMessage:output_type -> Empty
 	2, // [2:4] is the sub-list for method output_type
 	0, // [0:2] is the sub-list for method input_type

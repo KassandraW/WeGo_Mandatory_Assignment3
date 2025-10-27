@@ -32,7 +32,7 @@ S4. The Chit Chat service must broadcast each published message to all
 
 currently active participants. Each broadcast must include the message
 
-content and a logical timestamp.
+content and a logical timestamp. [x]
 
 
 S5. Participants may join the system at any time.  When a new
@@ -41,7 +41,7 @@ participant X joins, the service must broadcast a message of the form:
 
 "Participant X joined Chit Chat at logical time L". This message must
 
-be delivered to all participants, including the newly joined one.
+be delivered to all participants, including the newly joined one. [x]
 
 
 S6. Participants may leave the system at any time.  When a participant
@@ -50,14 +50,14 @@ X leaves, the service must broadcast a message of the form:
 
 "Participant X left Chit Chat at logical time L". This message must be
 
-delivered to all remaining participants.
+delivered to all remaining participants. [x]
 
 
 S7. When a participant receives any broadcast message, it must: i)
 
 display the message content and its logical timestamp on the client
 
-interface; and ii) log the message content and its logical timestamp.
+interface; and ii) log the message content and its logical timestamp. [x] mangler log til fil
 
 
 
@@ -97,24 +97,24 @@ interface; and ii) log the message content and its logical timestamp.
 
 - The system must log the following events:
 
-  * Server startup and shutdown
+  * Server startup and shutdown [mangler shutdown]
 
-  * Client connection and disconnection events
+  * Client connection and disconnection events [x]
 
-  * Broadcast of join/leave messages
+  * Broadcast of join/leave messages [x]
 
-  * Message delivery events
+  * Message delivery events [x]
 
 
 - Log messages must include:
 
-  * Timestamp
+  * Timestamp [x]
 
-  * Component name (Server/Client)
+  * Component name (Server/Client) [x]
 
-  * Event type
+  * Event type [x]
 
-  * Relevant identifiers (e.g. Client ID).
+  * Relevant identifiers (e.g. Client ID). [x]
 
 
 - The system can be started with at least three (3) nodes (two client
