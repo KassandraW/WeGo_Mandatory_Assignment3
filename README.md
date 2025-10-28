@@ -9,6 +9,6 @@
 Simply type exit and this bodcast your exit.
 alternetivly hit "control + c" to terminate terminal 
 
-### Terminate Server 
+## Terminate Server 
 Simply type exit and this stops the server then hit "control + c" to kill terminal 
 
