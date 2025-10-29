@@ -6,8 +6,7 @@
 ### send messages 
  pic 1 or more clients and simply write your message and hit enter this sends the message to the client that then broadcast it.
 ### "leave chat"
-Simply type exit and this bodcast your exit.
-alternetivly hit "control + c" to terminate terminal 
+hit "control + c" to log off 
 
 ## Terminate Server 
 Simply type exit and this stops the server then hit "control + c" to kill terminal 
